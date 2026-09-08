@@ -1,0 +1,52 @@
+```html
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="form-container">
+
+    <h1>🌸 Login</h1>
+
+    <p>Apne Handmade Blooms account me login karein.</p>
+
+    {% if error %}
+        <div class="error-message">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    <form method="POST" action="/login">
+
+        <label>Email</label>
+
+        <input
+            type="email"
+            name="email"
+            placeholder="Enter your email"
+            required
+        >
+
+        <label>Password</label>
+
+        <input
+            type="password"
+            name="password"
+            placeholder="Enter your password"
+            required
+        >
+
+        <button type="submit">
+            Login
+        </button>
+
+    </form>
+
+    <p>
+        Don't have an account?
+        <a href="/signup">Create Account</a>
+    </p>
+
+</div>
+
+{% endblock %}
+```

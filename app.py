@@ -1,10 +1,10 @@
-
 from flask import Flask, render_template, request, redirect, session
 import json
 import os
 import random
 import re
 from datetime import datetime, timedelta
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 app = Flask(__name__)
@@ -14,6 +14,7 @@ app.secret_key = "handmade_blooms_secret_key"
 ORDERS_FILE = "orders.json"
 NOTIFICATIONS_FILE = "notifications.json"
 REVIEWS_FILE = "reviews.json"
+USERS_FILE = "users.json"
 
 ADMIN_PASSWORD = "HBadmin123"
 
@@ -99,6 +100,111 @@ def safe_integer(value, default=0):
     except (ValueError, TypeError):
 
         return default
+
+
+# =========================================
+# USER / CUSTOMER ACCOUNT FUNCTIONS
+# =========================================
+
+def load_users():
+
+    if not os.path.exists(USERS_FILE):
+        return []
+
+    try:
+
+        with open(
+            USERS_FILE,
+            "r",
+            encoding="utf-8"
+        ) as file:
+
+            data = json.load(file)
+
+            if isinstance(data, list):
+                return data
+
+            return []
+
+    except (
+        json.JSONDecodeError,
+        FileNotFoundError,
+        OSError
+    ):
+
+        return []
+
+
+def save_users(users):
+
+    try:
+
+        with open(
+            USERS_FILE,
+            "w",
+            encoding="utf-8"
+        ) as file:
+
+            json.dump(
+                users,
+                file,
+                indent=4,
+                ensure_ascii=False
+            )
+
+        return True
+
+    except OSError:
+
+        return False
+
+
+def generate_customer_id():
+
+    users = load_users()
+
+    existing_ids = {
+        str(user.get("customer_id", ""))
+        for user in users
+    }
+
+    while True:
+
+        customer_id = (
+            "HBUSER" +
+            str(random.randint(100000, 999999))
+        )
+
+        if customer_id not in existing_ids:
+            return customer_id
+
+
+def get_logged_in_user():
+
+    customer_id = session.get(
+        "customer_id",
+        ""
+    )
+
+    if not customer_id:
+        return None
+
+    users = load_users()
+
+    for user in users:
+
+        if str(
+            user.get("customer_id", "")
+        ) == str(customer_id):
+
+            return user
+
+    return None
+
+
+def is_customer_logged_in():
+
+    return get_logged_in_user() is not None
 
 
 # =========================================
@@ -314,8 +420,6 @@ def save_reviews(reviews):
 
 def is_review_approved(review):
 
-    # Old reviews without "approved" field
-    # are treated as approved.
     return review.get("approved", True) is True
 
 
@@ -424,8 +528,6 @@ def verify_product_purchase(
             and existing_mobile == mobile
         ):
 
-            # Verified Purchase is only possible
-            # after the order has been delivered.
             if order.get("status", "") != "Delivered":
                 return False
 
@@ -442,8 +544,6 @@ def verify_product_purchase(
 
                 if item_id == str(product_id):
 
-                    # Custom and demand orders are
-                    # not normal product reviews.
                     if (
                         item_id.startswith("custom_")
                         or item_id.startswith("demand_")
@@ -597,6 +697,354 @@ def calculate_coupon_discount(product_total):
 
 
 # =========================================
+# CUSTOMER ACCOUNT - SIGN UP
+# =========================================
+
+@app.route(
+    "/signup",
+    methods=["GET", "POST"]
+)
+def signup():
+
+    if is_customer_logged_in():
+        return redirect("/account")
+
+    error = None
+
+    if request.method == "POST":
+
+        name = clean_text(
+            request.form.get(
+                "name",
+                ""
+            ),
+            100
+        )
+
+        email = clean_text(
+            request.form.get(
+                "email",
+                ""
+            ),
+            150
+        ).lower()
+
+        mobile = clean_text(
+            request.form.get(
+                "mobile",
+                ""
+            ),
+            10
+        )
+
+        password = request.form.get(
+            "password",
+            ""
+        )
+
+        confirm_password = request.form.get(
+            "confirm_password",
+            ""
+        )
+
+        if not name or len(name) < 2:
+
+            error = "Please enter a valid name."
+
+        elif not is_valid_email(email):
+
+            error = "Please enter a valid email address."
+
+        elif (
+            not mobile.isdigit()
+            or len(mobile) != 10
+        ):
+
+            error = (
+                "Please enter a valid "
+                "10-digit mobile number."
+            )
+
+        elif len(password) < 6:
+
+            error = (
+                "Password must be at least "
+                "6 characters."
+            )
+
+        elif password != confirm_password:
+
+            error = "Passwords do not match."
+
+        else:
+
+            users = load_users()
+
+            email_exists = False
+            mobile_exists = False
+
+            for user in users:
+
+                if str(
+                    user.get("email", "")
+                ).lower() == email:
+
+                    email_exists = True
+
+                if str(
+                    user.get("mobile", "")
+                ) == mobile:
+
+                    mobile_exists = True
+
+            if email_exists:
+
+                error = (
+                    "An account with this "
+                    "email already exists."
+                )
+
+            elif mobile_exists:
+
+                error = (
+                    "An account with this "
+                    "mobile number already exists."
+                )
+
+            else:
+
+                customer_id = generate_customer_id()
+
+                new_user = {
+
+                    "customer_id": customer_id,
+
+                    "name": name,
+
+                    "email": email,
+
+                    "mobile": mobile,
+
+                    "password": generate_password_hash(
+                        password
+                    ),
+
+                    "created_at": datetime.now().strftime(
+                        "%d-%m-%Y %I:%M %p"
+                    )
+                }
+
+                users.append(new_user)
+
+                if save_users(users):
+
+                    session["customer_id"] = customer_id
+                    session["customer_mobile"] = mobile
+
+                    session.modified = True
+
+                    return redirect("/account")
+
+                error = (
+                    "Account could not be created. "
+                    "Please try again."
+                )
+
+    return render_template(
+        "signup.html",
+        error=error,
+        cart_count=get_cart_count(),
+        wishlist_count=get_wishlist_count()
+    )
+
+
+# =========================================
+# CUSTOMER ACCOUNT - LOGIN
+# =========================================
+
+@app.route(
+    "/login",
+    methods=["GET", "POST"]
+)
+def login():
+
+    if is_customer_logged_in():
+        return redirect("/account")
+
+    error = None
+
+    if request.method == "POST":
+
+        email = clean_text(
+            request.form.get(
+                "email",
+                ""
+            ),
+            150
+        ).lower()
+
+        password = request.form.get(
+            "password",
+            ""
+        )
+
+        if not is_valid_email(email):
+
+            error = (
+                "Please enter a valid "
+                "email address."
+            )
+
+        elif not password:
+
+            error = "Please enter your password."
+
+        else:
+
+            users = load_users()
+
+            found_user = None
+
+            for user in users:
+
+                if str(
+                    user.get("email", "")
+                ).lower() == email:
+
+                    found_user = user
+                    break
+
+            if found_user is None:
+
+                error = (
+                    "No account found "
+                    "with this email."
+                )
+
+            else:
+
+                stored_password = str(
+                    found_user.get(
+                        "password",
+                        ""
+                    )
+                )
+
+                if check_password_hash(
+                    stored_password,
+                    password
+                ):
+
+                    session["customer_id"] = (
+                        found_user.get(
+                            "customer_id",
+                            ""
+                        )
+                    )
+
+                    session["customer_mobile"] = (
+                        found_user.get(
+                            "mobile",
+                            ""
+                        )
+                    )
+
+                    session.modified = True
+
+                    return redirect("/account")
+
+                error = "Incorrect password."
+
+    return render_template(
+        "login.html",
+        error=error,
+        cart_count=get_cart_count(),
+        wishlist_count=get_wishlist_count()
+    )
+
+
+# =========================================
+# CUSTOMER ACCOUNT - LOGOUT
+# =========================================
+
+@app.route("/logout")
+def logout():
+
+    session.pop(
+        "customer_id",
+        None
+    )
+
+    session.pop(
+        "customer_mobile",
+        None
+    )
+
+    return redirect("/")
+
+
+# =========================================
+# CUSTOMER ACCOUNT PAGE
+# =========================================
+
+@app.route("/account")
+def account():
+
+    user = get_logged_in_user()
+
+    if user is None:
+        return redirect("/login")
+
+    customer_id = user.get(
+        "customer_id",
+        ""
+    )
+
+    all_orders = load_orders()
+
+    customer_orders = []
+
+    for order in all_orders:
+
+        if str(
+            order.get(
+                "customer_id",
+                ""
+            )
+        ) == str(customer_id):
+
+            customer_orders.append(order)
+
+        elif (
+            not order.get("customer_id")
+            and
+            str(
+                order.get(
+                    "mobile",
+                    ""
+                )
+            ) == str(
+                user.get(
+                    "mobile",
+                    ""
+                )
+            )
+        ):
+
+            customer_orders.append(order)
+
+    customer_orders.reverse()
+
+    return render_template(
+        "account.html",
+        user=user,
+        orders=customer_orders,
+        cart_count=get_cart_count(),
+        wishlist_count=get_wishlist_count()
+    )
+
+
+# =========================================
 # HOME
 # =========================================
 
@@ -704,10 +1152,6 @@ def add_review(product_id):
         10
     )
 
-    # =====================================
-    # BASIC VALIDATION
-    # =====================================
-
     if not name or len(name) < 2:
 
         return redirect(
@@ -746,28 +1190,18 @@ def add_review(product_id):
             product_id
         )
 
-    # =====================================
-    # VERIFY PURCHASE
-    # =====================================
-
     verified_purchase = verify_product_purchase(
         product_id,
         order_id,
         mobile
     )
 
-    # Only verified delivered purchases
-    # can submit a review.
     if not verified_purchase:
 
         return redirect(
             "/product/" +
             product_id
         )
-
-    # =====================================
-    # PREVENT DUPLICATE REVIEW
-    # =====================================
 
     if has_existing_review(
         product_id,
@@ -779,10 +1213,6 @@ def add_review(product_id):
             "/product/" +
             product_id
         )
-
-    # =====================================
-    # SAVE REVIEW
-    # =====================================
 
     reviews = load_reviews()
 
@@ -815,18 +1245,12 @@ def add_review(product_id):
 
         "verified_purchase": True,
 
-        # New reviews must be approved
-        # by the admin before appearing.
         "approved": False
     }
 
     reviews.append(review)
 
     save_reviews(reviews)
-
-    # =====================================
-    # ADMIN NOTIFICATION
-    # =====================================
 
     add_notification(
         "new_review",
@@ -1261,6 +1685,8 @@ def checkout():
         None
     )
 
+    user = get_logged_in_user()
+
     return render_template(
         "checkout.html",
         cart_items=cart_items,
@@ -1268,6 +1694,7 @@ def checkout():
         coupon_code=coupon_code,
         discount=discount,
         coupon_error=coupon_error,
+        user=user,
         cart_count=get_cart_count(),
         wishlist_count=get_wishlist_count()
     )
@@ -1519,9 +1946,22 @@ def place_order():
 
     order_id = generate_order_id()
 
+    logged_in_user = get_logged_in_user()
+
+    customer_id = ""
+
+    if logged_in_user:
+
+        customer_id = logged_in_user.get(
+            "customer_id",
+            ""
+        )
+
     order = {
 
         "order_id": order_id,
+
+        "customer_id": customer_id,
 
         "name": name,
 
@@ -1910,14 +2350,46 @@ def my_orders():
 
     mobile = ""
 
-    if request.method == "GET":
+    logged_in_user = get_logged_in_user()
 
-        mobile = session.get(
-            "customer_mobile",
+    if logged_in_user:
+
+        customer_id = logged_in_user.get(
+            "customer_id",
             ""
         )
 
-    if request.method == "POST":
+        all_orders = load_orders()
+
+        orders = [
+            order
+            for order in all_orders
+            if str(
+                order.get(
+                    "customer_id",
+                    ""
+                )
+            ) == str(customer_id)
+            or (
+                not order.get("customer_id")
+                and
+                str(
+                    order.get(
+                        "mobile",
+                        ""
+                    )
+                ) == str(
+                    logged_in_user.get(
+                        "mobile",
+                        ""
+                    )
+                )
+            )
+        ]
+
+        orders.reverse()
+
+    elif request.method == "POST":
 
         mobile = clean_text(
             request.form.get(
@@ -1926,8 +2398,6 @@ def my_orders():
             ),
             10
         )
-
-    if mobile:
 
         if (
             not mobile.isdigit()
@@ -1940,6 +2410,37 @@ def my_orders():
             )
 
         else:
+
+            all_orders = load_orders()
+
+            orders = [
+                order
+                for order in all_orders
+                if str(
+                    order.get(
+                        "mobile",
+                        ""
+                    )
+                ) == mobile
+            ]
+
+            orders.reverse()
+
+            if not orders:
+
+                error = (
+                    "No orders found "
+                    "for this mobile number."
+                )
+
+    else:
+
+        mobile = session.get(
+            "customer_mobile",
+            ""
+        )
+
+        if mobile:
 
             all_orders = load_orders()
 
@@ -1997,24 +2498,57 @@ def cancel_order(order_id):
 
     orders = load_orders()
 
+    logged_in_user = get_logged_in_user()
+
+    customer_id = ""
+
+    if logged_in_user:
+
+        customer_id = logged_in_user.get(
+            "customer_id",
+            ""
+        )
+
     for order in orders:
 
-        if (
+        same_order = (
             str(
                 order.get(
                     "order_id",
                     ""
                 )
             ) == str(order_id)
+        )
 
-            and
-
+        same_mobile = (
             str(
                 order.get(
                     "mobile",
                     ""
                 )
             ) == mobile
+        )
+
+        same_customer = (
+            customer_id
+            and
+            str(
+                order.get(
+                    "customer_id",
+                    ""
+                )
+            ) == str(customer_id)
+        )
+
+        if (
+            same_order
+            and
+            same_mobile
+            and
+            (
+                same_customer
+                or not order.get("customer_id")
+            )
         ):
 
             status = order.get(
@@ -2268,7 +2802,6 @@ def admin_orders():
 
     reviews.reverse()
 
-    # Count reviews waiting for approval.
     pending_reviews = [
         review
         for review in reviews

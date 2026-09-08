@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="account-page">
+
+```
+<div class="account-header">
+
+    <h1>👤 My Account</h1>
+
+    <p>
+        Welcome to your Handmade Blooms account 🌸
+    </p>
+
+</div>
+
+<div class="account-card">
+
+    <div class="account-icon">
+        👤
+    </div>
+
+    <h2>
+        {{ user["name"] }}
+    </h2>
+
+    <div class="customer-id-box">
+
+        <span>
+            Customer ID
+        </span>
+
+        <strong>
+            {{ user["customer_id"] }}
+        </strong>
+
+    </div>
+
+
+    <!-- ============================= -->
+    <!-- ORDER SUMMARY -->
+    <!-- ============================= -->
+
+    <div class="order-summary">
+
+        <div class="order-summary-box">
+
+            <span class="summary-number">
+                {{ orders|length }}
+            </span>
+
+            <span class="summary-label">
+                Total Orders
+            </span>
+
+        </div>
+
+        <div class="order-summary-box">
+
+            <span class="summary-number">
+                {{ orders|selectattr("status", "equalto", "Delivered")|list|length }}
+            </span>
+
+            <span class="summary-label">
+                Delivered
+            </span>
+
+        </div>
+
+        <div class="order-summary-box">
+
+            <span class="summary-number">
+                {{ orders|selectattr("status", "equalto", "Pending")|list|length }}
+            </span>
+
+            <span class="summary-label">
+                Pending
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- ============================= -->
+    <!-- ACCOUNT DETAILS -->
+    <!-- ============================= -->
+
+    <div class="account-details">
+
+        <div class="account-detail-row">
+
+            <span>
+                Name
+            </span>
+
+            <strong>
+                {{ user["name"] }}
+            </strong>
+
+        </div>
+
+        <div class="account-detail-row">
+
+            <span>
+                Email
+            </span>
+
+            <strong>
+                {{ user["email"] }}
+            </strong>
+
+        </div>
+
+        <div class="account-detail-row">
+
+            <span>
+                Mobile
+            </span>
+
+            <strong>
+                {{ user["mobile"] }}
+            </strong>
+
+        </div>
+
+        <div class="account-detail-row">
+
+            <span>
+                Account Created
+            </span>
+
+            <strong>
+                {{ user["created_at"] }}
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <!-- ============================= -->
+    <!-- ACTION BUTTONS -->
+    <!-- ============================= -->
+
+    <div class="account-actions">
+
+        <a href="/my_orders">
+            <button type="button">
+                📦 My Orders
+            </button>
+        </a>
+
+        <a href="/logout">
+            <button
+                type="button"
+                class="logout-button"
+            >
+                🚪 Logout
+            </button>
+        </a>
+
+    </div>
+
+</div>
+```
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,75 @@
+```html
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="form-container">
+
+    <h1>🌸 Create Account</h1>
+
+    <p>Handmade Blooms par apna account banayein.</p>
+
+    {% if error %}
+        <div class="error-message">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    <form method="POST" action="/signup">
+
+        <label>Name</label>
+        <input
+            type="text"
+            name="name"
+            placeholder="Enter your name"
+            required
+        >
+
+        <label>Email</label>
+        <input
+            type="email"
+            name="email"
+            placeholder="Enter your email"
+            required
+        >
+
+        <label>Mobile Number</label>
+        <input
+            type="text"
+            name="mobile"
+            placeholder="10-digit mobile number"
+            maxlength="10"
+            required
+        >
+
+        <label>Password</label>
+        <input
+            type="password"
+            name="password"
+            placeholder="Create a password"
+            required
+        >
+
+        <label>Confirm Password</label>
+        <input
+            type="password"
+            name="confirm_password"
+            placeholder="Confirm your password"
+            required
+        >
+
+        <button type="submit">
+            Create Account
+        </button>
+
+    </form>
+
+    <p>
+        Already have an account?
+        <a href="/login">Login</a>
+    </p>
+
+</div>
+
+{% endblock %}
+```

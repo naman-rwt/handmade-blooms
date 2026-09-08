@@ -4,143 +4,127 @@
 
 <div class="cart-page">
 
-```
-<div class="cart-header">
+    <div class="cart-header">
 
-    <h1>
-        Your Cart 🛒
-    </h1>
+        <h1>Your Cart 🛒</h1>
 
-    <p>
-        Review your items before checkout.
-    </p>
+        <p>
+            Review your items before checkout.
+        </p>
 
-</div>
+    </div>
 
+    {% if cart_items %}
 
-{% if cart_items %}
+    <div class="cart-layout">
 
-<div class="cart-layout">
+        <div class="cart-items-section">
 
-    <!-- ================================= -->
-    <!-- CART ITEMS -->
-    <!-- ================================= -->
+            {% for item in cart_items %}
 
-    <div class="cart-items-section">
+            <div class="cart-item">
 
-        {% for item in cart_items %}
+                <div class="cart-item-image">
 
-        <div class="cart-item">
+                    {% if item.image %}
 
-            <!-- PRODUCT IMAGE -->
+                    <img
+                        src="{{ url_for('static', filename='images/' + item.image) }}"
+                        alt="{{ item.name }}"
+                    >
 
-            <div class="cart-item-image">
-
-                {% if item.image %}
-
-                <img
-                    src="{{ url_for(
-                        'static',
-                        filename='images/' + item.image
-                    ) }}"
-                    alt="{{ item.name }}"
-                >
-
-                {% else %}
-
-                <div class="cart-placeholder">
-
-                    {% if item.id.startswith("custom_") %}
-                        💐
                     {% else %}
-                        🌺
+
+                    <div class="cart-placeholder">
+
+                        {% if item.id.startswith("custom_") %}
+                            💐
+                        {% else %}
+                            🌺
+                        {% endif %}
+
+                    </div>
+
                     {% endif %}
 
                 </div>
 
-                {% endif %}
+                <div class="cart-item-details">
 
-            </div>
+                    <h2>
+                        {{ item.name }}
+                    </h2>
 
+                    <p class="cart-item-price">
+                        ₹{{ item.price }} each
+                    </p>
 
-            <!-- PRODUCT INFORMATION -->
-
-            <div class="cart-item-details">
-
-                <h2>
-                    {{ item.name }}
-                </h2>
-
-                <p class="cart-item-price">
-                    ₹{{ item.price }} each
-                </p>
-
-
-                <!-- ITEM SUBTOTAL -->
-
-                <p class="cart-item-subtotal">
-
-                    Subtotal:
-                    <strong>
-                        ₹{{ item.price * item.quantity }}
-                    </strong>
-
-                </p>
-
-
-                <!-- CUSTOM / DEMAND DETAILS -->
-
-                {% if item.message %}
-
-                <div class="custom-details">
-
-                    <p>
+                    <p class="cart-item-subtotal">
+                        Subtotal:
                         <strong>
-                            {% if item.id.startswith("custom_") %}
-                                💐 Custom Bouquet Details
-                            {% else %}
-                                🌺 Demand Details
-                            {% endif %}
+                            ₹{{ item.price * item.quantity }}
                         </strong>
                     </p>
 
-                    <p>
-                        {{ item.message }}
-                    </p>
+                    {% if item.message %}
+
+                    <div class="custom-details">
+
+                        <p>
+                            <strong>
+                                {% if item.id.startswith("custom_") %}
+                                    💐 Custom Bouquet Details
+                                {% else %}
+                                    🌺 Demand Details
+                                {% endif %}
+                            </strong>
+                        </p>
+
+                        <p>
+                            {{ item.message }}
+                        </p>
+
+                    </div>
+
+                    {% endif %}
+
+                    <div class="quantity-box">
+
+                        <a href="/decrease/{{ item.id }}">
+                            <button
+                                type="button"
+                                aria-label="Decrease quantity"
+                            >
+                                −
+                            </button>
+                        </a>
+
+                        <span>
+                            {{ item.quantity }}
+                        </span>
+
+                        <a href="/increase/{{ item.id }}">
+                            <button
+                                type="button"
+                                aria-label="Increase quantity"
+                            >
+                                +
+                            </button>
+                        </a>
+
+                    </div>
 
                 </div>
 
-                {% endif %}
+                <div class="cart-item-remove">
 
-
-                <!-- QUANTITY -->
-
-                <div class="quantity-box">
-
-                    <a href="/decrease/{{ item.id }}">
+                    <a href="/remove/{{ item.id }}">
 
                         <button
                             type="button"
-                            aria-label="Decrease quantity"
+                            class="remove-button"
                         >
-                            −
-                        </button>
-
-                    </a>
-
-
-                    <span>
-                        {{ item.quantity }}
-                    </span>
-
-
-                    <a href="/increase/{{ item.id }}">
-
-                        <button
-                            type="button"
-                            aria-label="Increase quantity"
-                        >
-                            +
+                            Remove ❌
                         </button>
 
                     </a>
@@ -149,155 +133,117 @@
 
             </div>
 
-
-            <!-- REMOVE -->
-
-            <div class="cart-item-remove">
-
-                <a href="/remove/{{ item.id }}">
-
-                    <button
-                        type="button"
-                        class="remove-button"
-                    >
-                        Remove ❌
-                    </button>
-
-                </a>
-
-            </div>
+            {% endfor %}
 
         </div>
 
-        {% endfor %}
+        <div class="cart-summary">
+
+            <h2>
+                Order Summary
+            </h2>
+
+            <div class="summary-row">
+
+                <span>
+                    Products
+                </span>
+
+                <strong>
+                    ₹{{ total }}
+                </strong>
+
+            </div>
+
+            <div class="summary-row">
+
+                <span>
+                    Delivery
+                </span>
+
+                <strong>
+                    Calculated at checkout
+                </strong>
+
+            </div>
+
+            <div class="summary-divider"></div>
+
+            <div class="summary-total">
+
+                <span>
+                    Product Total
+                </span>
+
+                <strong>
+                    ₹{{ total }}
+                </strong>
+
+            </div>
+
+            <p class="delivery-note">
+
+                🚚 Delivery is <strong>FREE in Pali</strong>.
+                <br>
+                Outside Pali, delivery charge is <strong>₹99</strong>.
+
+            </p>
+
+            <a
+                href="/checkout"
+                class="checkout-link"
+            >
+
+                <button
+                    type="button"
+                    class="checkout-button"
+                >
+                    Proceed To Checkout →
+                </button>
+
+            </a>
+
+            <a
+                href="/"
+                class="continue-shopping"
+            >
+                ← Continue Shopping
+            </a>
+
+        </div>
 
     </div>
 
+    {% else %}
 
-    <!-- ================================= -->
-    <!-- ORDER SUMMARY -->
-    <!-- ================================= -->
+    <div class="empty-cart">
 
-    <div class="cart-summary">
+        <div class="empty-cart-icon">
+            🛒
+        </div>
 
         <h2>
-            Order Summary
+            Your cart is empty 🌸
         </h2>
 
-
-        <div class="summary-row">
-
-            <span>
-                Products
-            </span>
-
-            <strong>
-                ₹{{ total }}
-            </strong>
-
-        </div>
-
-
-        <div class="summary-row">
-
-            <span>
-                Delivery
-            </span>
-
-            <strong>
-                Calculated at checkout
-            </strong>
-
-        </div>
-
-
-        <div class="summary-divider"></div>
-
-
-        <div class="summary-total">
-
-            <span>
-                Product Total
-            </span>
-
-            <strong>
-                ₹{{ total }}
-            </strong>
-
-        </div>
-
-
-        <p class="delivery-note">
-
-            🚚 Delivery is <strong>FREE in Pali</strong>.
-            <br>
-            Outside Pali, delivery charge is <strong>₹99</strong>.
-
+        <p>
+            Looks like you haven't added anything yet.
         </p>
 
-
-        <a
-            href="/checkout"
-            class="checkout-link"
-        >
+        <a href="/">
 
             <button
                 type="button"
-                class="checkout-button"
+                class="continue-shopping-button"
             >
-                Proceed To Checkout →
+                Start Shopping 🌷
             </button>
 
         </a>
 
-
-        <a
-            href="/"
-            class="continue-shopping"
-        >
-            ← Continue Shopping
-        </a>
-
     </div>
 
-</div>
-
-
-{% else %}
-
-<!-- ================================= -->
-<!-- EMPTY CART -->
-<!-- ================================= -->
-
-<div class="empty-cart">
-
-    <div class="empty-cart-icon">
-        🛒
-    </div>
-
-    <h2>
-        Your cart is empty 🌸
-    </h2>
-
-    <p>
-        Looks like you haven't added anything yet.
-    </p>
-
-    <a href="/">
-
-        <button
-            type="button"
-            class="continue-shopping-button"
-        >
-            Start Shopping 🌷
-        </button>
-
-    </a>
-
-</div>
-
-{% endif %}
-```
+    {% endif %}
 
 </div>
 

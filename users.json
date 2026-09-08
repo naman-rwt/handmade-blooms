@@ -1,0 +1,10 @@
+[
+    {
+        "customer_id": "HBUSER613292",
+        "name": "naman",
+        "email": "rawataarti264@gmail.com",
+        "mobile": "7726824244",
+        "password": "scrypt:32768:8:1$26G71DaoKvKD5VOB$2d1fde1ef924dc2e81789b65a2625331c91dec89c6b09a8426d0d4c6aad26f87ea48153ab75bfe1c7c16fea4ad3964f5f5f749364a3d8c16313903777dc3058d",
+        "created_at": "08-09-2026 05:44 PM"
+    }
+]

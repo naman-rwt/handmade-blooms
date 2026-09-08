@@ -17,6 +17,130 @@
         href="{{ url_for('static', filename='css/style.css') }}"
     >
 
+    <style>
+
+        /* ============================= */
+        /* HEADER */
+        /* ============================= */
+
+        header {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+        }
+
+        /* ============================= */
+        /* HAMBURGER BUTTON */
+        /* ============================= */
+
+        .menu-button {
+            display: block !important;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+            padding: 5px 10px;
+            line-height: 1;
+        }
+
+        /* ============================= */
+        /* HIDE OLD NAVBAR */
+        /* ============================= */
+
+        header nav {
+            display: none !important;
+        }
+
+        /* ============================= */
+        /* SIDE MENU */
+        /* ============================= */
+
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: -320px;
+            width: 290px;
+            max-width: 80%;
+            height: 100vh;
+            background: white;
+            z-index: 9999;
+            box-shadow: 4px 0 18px rgba(0, 0, 0, 0.25);
+            transition: left 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .side-menu.open {
+            left: 0;
+        }
+
+        /* ============================= */
+        /* SIDE MENU HEADER */
+        /* ============================= */
+
+        .side-menu-header {
+            background: #ff6fa5;
+            color: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .side-menu-header h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .close-menu {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 32px;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        /* ============================= */
+        /* MENU LINKS */
+        /* ============================= */
+
+        .side-menu-links {
+            padding: 10px 0;
+        }
+
+        .side-menu-links a {
+            display: block;
+            padding: 16px 22px;
+            color: #333;
+            text-decoration: none;
+            font-size: 17px;
+            border-bottom: 1px solid #eeeeee;
+            transition: background 0.2s ease;
+        }
+
+        .side-menu-links a:hover {
+            background: #fff0f5;
+        }
+
+        /* ============================= */
+        /* OVERLAY */
+        /* ============================= */
+
+        .menu-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 9998;
+            display: none;
+        }
+
+        .menu-overlay.open {
+            display: block;
+        }
+
+    </style>
+
 </head>
 
 <body>
@@ -27,31 +151,107 @@
         🌸 Handmade Blooms
     </div>
 
-    <nav>
+    <!-- HAMBURGER BUTTON -->
+
+    <button
+        type="button"
+        class="menu-button"
+        onclick="openMenu()"
+        aria-label="Open menu"
+    >
+        ☰
+    </button>
+
+</header>
+
+
+<!-- ============================= -->
+<!-- MENU OVERLAY -->
+<!-- ============================= -->
+
+<div
+    class="menu-overlay"
+    id="menuOverlay"
+    onclick="closeMenu()"
+></div>
+
+
+<!-- ============================= -->
+<!-- SIDE MENU -->
+<!-- ============================= -->
+
+<div
+    class="side-menu"
+    id="sideMenu"
+>
+
+    <div class="side-menu-header">
+
+        <h2>
+            🌸 Handmade Blooms
+        </h2>
+
+        <button
+            type="button"
+            class="close-menu"
+            onclick="closeMenu()"
+            aria-label="Close menu"
+        >
+            ×
+        </button>
+
+    </div>
+
+
+    <div class="side-menu-links">
 
         <a href="/">
-            Home
+            🏠 Home
         </a>
 
         <a href="/cart">
-            Cart 🛒
+            🛒 Cart
         </a>
 
         <a href="/wishlist">
-            Wishlist ❤️
+            ❤️ Wishlist
         </a>
 
         <a href="/track_order">
-            Track Order 📦
+            📦 Track Order
         </a>
 
         <a href="/my_orders">
-            My Orders 📦
+            📦 My Orders
         </a>
 
-    </nav>
 
-</header>
+        {% if session.get("customer_id") %}
+
+        <a href="/account">
+            👤 Account
+        </a>
+
+        <a href="/logout">
+            🚪 Logout
+        </a>
+
+        {% else %}
+
+        <a href="/login">
+            🔐 Login
+        </a>
+
+        <a href="/signup">
+            🌸 Create Account
+        </a>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
 
 <main>
 
@@ -60,6 +260,7 @@
 
 </main>
 
+
 <footer>
 
     <p>
@@ -67,6 +268,40 @@
     </p>
 
 </footer>
+
+
+<script>
+
+    function openMenu() {
+
+        document
+            .getElementById("sideMenu")
+            .classList
+            .add("open");
+
+        document
+            .getElementById("menuOverlay")
+            .classList
+            .add("open");
+
+    }
+
+
+    function closeMenu() {
+
+        document
+            .getElementById("sideMenu")
+            .classList
+            .remove("open");
+
+        document
+            .getElementById("menuOverlay")
+            .classList
+            .remove("open");
+
+    }
+
+</script>
 
 </body>
 
