@@ -1,0 +1,1128 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="admin-page">
+
+    <div class="admin-header">
+
+        <div>
+
+            <h1>
+                Admin Orders 📦
+            </h1>
+
+            <p>
+                Manage customer orders, delivery dates
+                and order status.
+            </p>
+
+        </div>
+
+
+        <a href="/admin/logout">
+
+            <button
+                type="button"
+                class="logout-button"
+            >
+                Logout
+            </button>
+
+        </a>
+
+    </div>
+
+
+    <!-- =====================================
+         NOTIFICATIONS
+    ====================================== -->
+
+    <div class="admin-notification-box">
+
+        <div class="admin-notification-header">
+
+            <div>
+
+                <h2>
+                    🔔 Notifications
+                </h2>
+
+                {% if unread_count > 0 %}
+
+                <span class="notification-count">
+                    {{ unread_count }} Unread
+                </span>
+
+                {% else %}
+
+                <span class="notification-read-label">
+                    All caught up ✓
+                </span>
+
+                {% endif %}
+
+            </div>
+
+
+            {% if unread_count > 0 %}
+
+            <form
+                method="POST"
+                action="/admin/notifications/read"
+            >
+
+                <button
+                    type="submit"
+                    class="mark-read-button"
+                >
+                    Mark All As Read ✓
+                </button>
+
+            </form>
+
+            {% endif %}
+
+        </div>
+
+
+        {% if notifications %}
+
+        <div class="admin-notification-list">
+
+            {% for notification in notifications[:10] %}
+
+            <div class="admin-notification-item
+                {% if not notification.get('read', false) %}
+                    unread
+                {% endif %}
+            ">
+
+                <div class="notification-icon">
+
+                    {% if notification["type"] == "new_order" %}
+                        🛒
+                    {% elif notification["type"] == "cancelled_order" %}
+                        ❌
+                    {% elif notification["type"] == "new_review" %}
+                        ⭐
+                    {% else %}
+                        🔔
+                    {% endif %}
+
+                </div>
+
+
+                <div class="notification-content">
+
+                    <strong>
+                        {{ notification["title"] }}
+                    </strong>
+
+                    <p>
+                        {{ notification["message"] }}
+                    </p>
+
+                    <small>
+                        🕒 {{ notification["date"] }}
+                    </small>
+
+                </div>
+
+
+                {% if not notification.get("read", false) %}
+
+                <span class="new-dot">
+                    NEW
+                </span>
+
+                {% endif %}
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        {% else %}
+
+        <div class="no-notifications">
+
+            <div>
+                🔔
+            </div>
+
+            <h3>
+                No Notifications
+            </h3>
+
+            <p>
+                New orders and reviews will appear here.
+            </p>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- =====================================
+         REVIEW MODERATION
+    ====================================== -->
+
+    <div class="admin-reviews-box">
+
+        <div class="admin-reviews-header">
+
+            <div>
+
+                <h2>
+                    ⭐ Review Moderation
+                </h2>
+
+                <p>
+                    Approve genuine reviews or remove unwanted reviews.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        {% if reviews %}
+
+        <div class="admin-review-list">
+
+            {% for review in reviews %}
+
+            <div class="admin-review-card">
+
+                <div class="admin-review-main">
+
+                    <div class="admin-review-top">
+
+                        <div>
+
+                            <strong>
+                                {{ review.get("name", "Customer") }}
+                            </strong>
+
+                            <span class="admin-review-product">
+                                {{ review.get("product_name", "Product") }}
+                            </span>
+
+                        </div>
+
+
+                        <span class="admin-review-date">
+                            {{ review.get("date", "") }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="admin-review-stars">
+
+                        {% for i in range(1, 6) %}
+
+                            {% if i <= review.get("rating", 0) %}
+                                ★
+                            {% else %}
+                                ☆
+                            {% endif %}
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    {% if review.get("verified_purchase", false) %}
+
+                    <span class="admin-verified">
+                        ✓ Verified Purchase
+                    </span>
+
+                    {% else %}
+
+                    <span class="admin-unverified">
+                        Unverified Purchase
+                    </span>
+
+                    {% endif %}
+
+
+                    <p class="admin-review-text">
+                        {{ review.get("review", "") }}
+                    </p>
+
+
+                    {% if review.get("order_id") %}
+
+                    <div class="admin-review-order">
+                        Order ID:
+                        <strong>
+                            {{ review.get("order_id") }}
+                        </strong>
+                    </div>
+
+                    {% endif %}
+
+                </div>
+
+
+                <div class="admin-review-actions">
+
+                    {% if review.get("approved", true) %}
+
+                    <span class="approved-label">
+                        ✓ Approved
+                    </span>
+
+                    {% else %}
+
+                    <span class="pending-label">
+                        ⏳ Pending
+                    </span>
+
+
+                    <form
+                        method="POST"
+                        action="/admin/reviews/approve/{{ review.get('id') }}"
+                    >
+
+                        <button
+                            type="submit"
+                            class="approve-review-button"
+                        >
+                            Approve ✓
+                        </button>
+
+                    </form>
+
+                    {% endif %}
+
+
+                    <form
+                        method="POST"
+                        action="/admin/reviews/delete/{{ review.get('id') }}"
+                        onsubmit="return confirm('Delete this review?');"
+                    >
+
+                        <button
+                            type="submit"
+                            class="delete-review-button"
+                        >
+                            Delete 🗑️
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        {% else %}
+
+        <div class="no-admin-reviews">
+
+            <div>
+                ⭐
+            </div>
+
+            <h3>
+                No Reviews Yet
+            </h3>
+
+            <p>
+                Customer reviews will appear here.
+            </p>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- =====================================
+         ORDERS
+    ====================================== -->
+
+    {% if orders %}
+
+    <div class="admin-orders">
+
+        {% for order in orders %}
+
+        <div class="admin-order-card">
+
+            <div class="order-top">
+
+                <div>
+
+                    <h2>
+                        {{ order["order_id"] }}
+                    </h2>
+
+                    <p class="order-date">
+                        🕒 {{ order["order_date"] }}
+                    </p>
+
+                </div>
+
+
+                <div class="status-badge
+
+                    {% if order["status"] == "Pending" %}
+                        pending
+                    {% elif order["status"] == "Processing" %}
+                        processing
+                    {% elif order["status"] == "Shipped" %}
+                        shipped
+                    {% elif order["status"] == "Delivered" %}
+                        delivered
+                    {% elif order["status"] == "Cancelled" %}
+                        cancelled
+                    {% endif %}
+
+                ">
+
+                    {{ order["status"] }}
+
+                </div>
+
+            </div>
+
+
+            <div class="admin-divider"></div>
+
+
+            <div class="admin-section">
+
+                <h3>
+                    👤 Customer Details
+                </h3>
+
+                <div class="customer-grid">
+
+                    <div>
+                        <strong>Name</strong>
+                        <span>{{ order["name"] }}</span>
+                    </div>
+
+                    <div>
+                        <strong>Mobile</strong>
+                        <span>{{ order["mobile"] }}</span>
+                    </div>
+
+                    <div>
+                        <strong>Email</strong>
+                        <span>{{ order["email"] }}</span>
+                    </div>
+
+                    <div>
+                        <strong>Address</strong>
+                        <span>
+                            {{ order["address"] }},
+                            {{ order["city"] }},
+                            {{ order["state"] }}
+                            - {{ order["pincode"] }}
+                        </span>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="admin-divider"></div>
+
+
+            <div class="admin-section">
+
+                <h3>
+                    🛍️ Order Items
+                </h3>
+
+
+                {% for item in order["items"] %}
+
+                <div class="admin-item">
+
+                    <div class="admin-item-info">
+
+                        <h4>
+                            {{ item["name"] }}
+                        </h4>
+
+                        <p>
+                            ₹{{ item["price"] }}
+                            ×
+                            {{ item["quantity"] }}
+                        </p>
+
+
+                        {% if item.get("message") %}
+
+                        <div class="admin-special-details">
+
+                            <strong>
+                                💐 Special Details
+                            </strong>
+
+                            <p>
+                                {{ item["message"] }}
+                            </p>
+
+                        </div>
+
+                        {% endif %}
+
+
+                        {% if item.get("flower_name") %}
+
+                        <p>
+
+                            <strong>
+                                🌺 Requested Flower:
+                            </strong>
+
+                            {{ item["flower_name"] }}
+
+                        </p>
+
+                        {% endif %}
+
+
+                        {% if item.get("demand_details") %}
+
+                        <p>
+
+                            <strong>
+                                ✨ Customer Demand:
+                            </strong>
+
+                            {{ item["demand_details"] }}
+
+                        </p>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="admin-item-price">
+
+                        ₹{{ item["price"] * item["quantity"] }}
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+
+            <div class="admin-divider"></div>
+
+
+            <div class="admin-section">
+
+                <h3>
+                    💰 Payment Summary
+                </h3>
+
+
+                <div class="price-summary">
+
+                    <div>
+
+                        <span>
+                            Products Total
+                        </span>
+
+                        <strong>
+                            ₹{{ order["product_total"] }}
+                        </strong>
+
+                    </div>
+
+
+                    {% if order.get("discount", 0) > 0 %}
+
+                    <div>
+
+                        <span>
+                            Coupon Discount
+                        </span>
+
+                        <strong>
+                            -₹{{ order["discount"] }}
+                        </strong>
+
+                    </div>
+
+                    {% endif %}
+
+
+                    <div>
+
+                        <span>
+                            Delivery Charge
+                        </span>
+
+                        <strong>
+                            ₹{{ order["delivery_charge"] }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="final-price">
+
+                        <span>
+                            Final Total
+                        </span>
+
+                        <strong>
+                            ₹{{ order["final_total"] }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="admin-divider"></div>
+
+
+            <div class="admin-section">
+
+                <h3>
+                    ⚙️ Update Order
+                </h3>
+
+
+                <form
+                    method="POST"
+                    action="/admin/orders"
+                    class="admin-update-form"
+                >
+
+                    <input
+                        type="hidden"
+                        name="order_id"
+                        value="{{ order["order_id"] }}"
+                    >
+
+
+                    <div class="admin-form-group">
+
+                        <label>
+                            Order Status
+                        </label>
+
+
+                        <select name="status">
+
+                            <option
+                                value="Pending"
+                                {% if order["status"] == "Pending" %}
+                                selected
+                                {% endif %}
+                            >
+                                Pending
+                            </option>
+
+                            <option
+                                value="Processing"
+                                {% if order["status"] == "Processing" %}
+                                selected
+                                {% endif %}
+                            >
+                                Processing
+                            </option>
+
+                            <option
+                                value="Shipped"
+                                {% if order["status"] == "Shipped" %}
+                                selected
+                                {% endif %}
+                            >
+                                Shipped
+                            </option>
+
+                            <option
+                                value="Delivered"
+                                {% if order["status"] == "Delivered" %}
+                                selected
+                                {% endif %}
+                            >
+                                Delivered
+                            </option>
+
+                            <option
+                                value="Cancelled"
+                                {% if order["status"] == "Cancelled" %}
+                                selected
+                                {% endif %}
+                            >
+                                Cancelled
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="admin-form-group">
+
+                        <label>
+                            📅 Expected Delivery Date
+                        </label>
+
+
+                        <input
+                            type="date"
+                            name="delivery_date"
+                        >
+
+
+                        {% if order.get("delivery_date") %}
+
+                        <small>
+                            Current Date:
+                            {{ order["delivery_date"] }}
+                        </small>
+
+                        {% else %}
+
+                        <small>
+                            Minimum delivery time: 10 days.
+                        </small>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="update-button"
+                    >
+                        Save Order Changes ✓
+                    </button>
+
+                </form>
+
+            </div>
+
+
+            <div class="delivery-info">
+
+                {% if order.get("delivery_date") %}
+
+                    📅 Expected Delivery Date:
+
+                    <strong>
+                        {{ order["delivery_date"] }}
+                    </strong>
+
+                {% else %}
+
+                    📦 Minimum Delivery Time:
+
+                    <strong>
+                        10 Days
+                    </strong>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+
+    {% else %}
+
+    <div class="no-orders">
+
+        <div>
+            📦
+        </div>
+
+        <h2>
+            No Orders Yet
+        </h2>
+
+        <p>
+            Customer orders will appear here
+            when someone places an order.
+        </p>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+
+<style>
+
+/* =========================================
+   NOTIFICATIONS
+   ========================================= */
+
+.admin-notification-box,
+.admin-reviews-box {
+    background: white;
+    border-radius: 18px;
+    padding: 22px;
+    margin-bottom: 28px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+.admin-notification-header,
+.admin-reviews-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 18px;
+}
+
+.admin-notification-header h2,
+.admin-reviews-header h2 {
+    margin: 0 0 6px 0;
+}
+
+.admin-reviews-header p {
+    margin: 5px 0 0;
+    color: #777;
+}
+
+.notification-count {
+    display: inline-block;
+    background: #ff4f81;
+    color: white;
+    padding: 5px 11px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.notification-read-label {
+    color: #3d9b68;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.mark-read-button {
+    border: none;
+    background: #ff6fa5;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.mark-read-button:hover {
+    opacity: 0.9;
+}
+
+.admin-notification-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.admin-notification-item {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 15px;
+    border-radius: 12px;
+    background: #fff8fa;
+    border: 1px solid #f3dfe6;
+}
+
+.admin-notification-item.unread {
+    background: #fff0f5;
+    border-left: 5px solid #ff6fa5;
+}
+
+.notification-icon {
+    font-size: 25px;
+    min-width: 35px;
+}
+
+.notification-content {
+    flex: 1;
+}
+
+.notification-content strong {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.notification-content p {
+    margin: 0 0 5px 0;
+}
+
+.notification-content small {
+    color: #777;
+}
+
+.new-dot {
+    background: #ff4f81;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 5px 8px;
+    border-radius: 10px;
+}
+
+.no-notifications {
+    text-align: center;
+    padding: 25px;
+    color: #777;
+}
+
+.no-notifications div {
+    font-size: 35px;
+}
+
+.no-notifications h3 {
+    margin-bottom: 5px;
+}
+
+
+/* =========================================
+   REVIEW MODERATION
+   ========================================= */
+
+.admin-review-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.admin-review-card {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 18px;
+    border-radius: 14px;
+    background: #fff8fa;
+    border: 1px solid #f1dce4;
+}
+
+.admin-review-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.admin-review-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.admin-review-top strong {
+    display: block;
+    color: #333;
+    font-size: 16px;
+}
+
+.admin-review-product {
+    display: inline-block;
+    margin-top: 4px;
+    color: #ff5c96;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.admin-review-date {
+    color: #999;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.admin-review-stars {
+    margin-top: 9px;
+    color: #ffb400;
+    font-size: 18px;
+    letter-spacing: 1px;
+}
+
+.admin-verified,
+.admin-unverified {
+    display: inline-block;
+    margin-top: 7px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.admin-verified {
+    background: #e8f8ef;
+    color: #25824d;
+}
+
+.admin-unverified {
+    background: #fff3df;
+    color: #a66a00;
+}
+
+.admin-review-text {
+    margin: 12px 0 0;
+    color: #555;
+    line-height: 1.6;
+    word-break: break-word;
+}
+
+.admin-review-order {
+    margin-top: 10px;
+    color: #777;
+    font-size: 12px;
+}
+
+.admin-review-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    min-width: 130px;
+}
+
+.approved-label,
+.pending-label {
+    text-align: center;
+    padding: 8px;
+    border-radius: 9px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.approved-label {
+    background: #e8f8ef;
+    color: #25824d;
+}
+
+.pending-label {
+    background: #fff3df;
+    color: #a66a00;
+}
+
+.approve-review-button,
+.delete-review-button {
+    width: 100%;
+    padding: 9px 12px;
+    border: none;
+    border-radius: 9px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.approve-review-button {
+    background: #3d9b68;
+}
+
+.approve-review-button:hover {
+    background: #328458;
+}
+
+.delete-review-button {
+    background: #e85b68;
+}
+
+.delete-review-button:hover {
+    background: #d84957;
+}
+
+.no-admin-reviews {
+    text-align: center;
+    padding: 30px;
+    color: #777;
+}
+
+.no-admin-reviews div {
+    font-size: 40px;
+}
+
+.no-admin-reviews h3 {
+    margin-bottom: 5px;
+}
+
+
+/* =========================================
+   MOBILE
+   ========================================= */
+
+@media (max-width: 700px) {
+
+    .admin-notification-header,
+    .admin-reviews-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .mark-read-button {
+        width: 100%;
+    }
+
+    .admin-notification-item {
+        padding: 12px;
+    }
+
+    .notification-icon {
+        font-size: 21px;
+        min-width: 28px;
+    }
+
+    .notification-content p {
+        font-size: 14px;
+    }
+
+    .new-dot {
+        font-size: 9px;
+    }
+
+    .admin-review-card {
+        flex-direction: column;
+    }
+
+    .admin-review-actions {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .admin-review-top {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .admin-review-date {
+        white-space: normal;
+    }
+}
+
+</style>
+
+{% endblock %}

@@ -1,0 +1,732 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+
+.product-rating-summary {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 10px 0 15px;
+}
+
+.rating-stars {
+    color: #ffb400;
+    font-size: 21px;
+    letter-spacing: 1px;
+}
+
+.rating-number {
+    color: #444;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.rating-count {
+    color: #888;
+    font-size: 14px;
+}
+
+.no-rating {
+    color: #999;
+    font-size: 14px;
+}
+
+
+.reviews-section {
+    width: 100%;
+    max-width: 1200px;
+    margin: 50px auto 70px;
+    padding: 0 25px;
+    box-sizing: border-box;
+}
+
+.reviews-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.reviews-header h2 {
+    margin: 0;
+    color: #333;
+    font-size: 30px;
+}
+
+.reviews-header p {
+    margin-top: 8px;
+    color: #777;
+    font-size: 15px;
+}
+
+.review-layout {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 25px;
+    align-items: start;
+}
+
+.review-form-card {
+    padding: 25px;
+    box-sizing: border-box;
+}
+
+.review-form-card h3 {
+    margin: 0 0 20px;
+    color: #333;
+    font-size: 21px;
+}
+
+.review-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.review-form label {
+    margin: 0 0 7px;
+    color: #444;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.review-form input[type="text"],
+.review-form input[type="tel"],
+.review-form textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    margin-bottom: 17px;
+    border: 1px solid #e5c4d0;
+    border-radius: 9px;
+    outline: none;
+    font-size: 14px;
+    font-family: Arial, sans-serif;
+    background: white;
+}
+
+.review-form input:focus,
+.review-form textarea:focus {
+    border-color: #ff6fa5;
+}
+
+.review-form textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.review-help {
+    margin: -8px 0 17px;
+    color: #888;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.star-selector {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 2px;
+    margin-bottom: 20px;
+}
+
+.star-selector input {
+    display: none;
+}
+
+.star-selector label {
+    margin: 0;
+    font-size: 31px;
+    color: #d5d5d5;
+    cursor: pointer;
+    transition: 0.15s ease;
+}
+
+.star-selector label:hover,
+.star-selector label:hover ~ label,
+.star-selector input:checked ~ label {
+    color: #ffb400;
+}
+
+.submit-review-button {
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 10px;
+    background: #ff6fa5;
+    color: white;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.submit-review-button:hover {
+    background: #ff4f91;
+}
+
+.review-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.review-card {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    border: 1px solid #f0d9e1;
+    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.06);
+}
+
+.review-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.review-name {
+    color: #333;
+    font-size: 16px;
+}
+
+.review-stars {
+    margin-top: 5px;
+    color: #ffb400;
+    font-size: 17px;
+    letter-spacing: 1px;
+}
+
+.review-date {
+    color: #999;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.verified-badge {
+    display: inline-block;
+    margin-top: 7px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    background: #e8f8ef;
+    color: #25824d;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.review-text {
+    margin: 14px 0 0;
+    color: #666;
+    font-size: 14px;
+    line-height: 1.6;
+    word-break: break-word;
+}
+
+.no-reviews {
+    padding: 45px 20px;
+    text-align: center;
+    background: white;
+    border-radius: 15px;
+    border: 1px solid #f0d9e1;
+}
+
+.no-reviews-icon {
+    font-size: 45px;
+    margin-bottom: 10px;
+}
+
+.no-reviews h3 {
+    margin: 0;
+    color: #444;
+    font-size: 22px;
+}
+
+.no-reviews p {
+    margin-top: 8px;
+    color: #888;
+    font-size: 14px;
+}
+
+@media (max-width: 850px) {
+
+    .review-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+
+    .reviews-section {
+        padding: 0 15px;
+        margin-top: 40px;
+        margin-bottom: 50px;
+    }
+
+    .reviews-header h2 {
+        font-size: 26px;
+    }
+
+    .review-form-card {
+        padding: 20px;
+    }
+
+    .review-top {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .review-date {
+        white-space: normal;
+    }
+}
+
+</style>
+
+
+<section class="product-detail">
+
+    <div class="product-detail-image">
+
+        <img
+            src="{{ url_for(
+                'static',
+                filename='images/' + product.image
+            ) }}"
+            alt="{{ product.name }}"
+        >
+
+    </div>
+
+
+    <div class="product-detail-info">
+
+        <h1>
+            {{ product.name }}
+        </h1>
+
+
+        <div class="product-price">
+            ₹{{ product.price }}
+        </div>
+
+
+        <div class="product-rating-summary">
+
+            {% if review_count > 0 %}
+
+                <span class="rating-stars">
+
+                    {% for i in range(1, 6) %}
+
+                        {% if i <= average_rating %}
+                            ★
+                        {% else %}
+                            ☆
+                        {% endif %}
+
+                    {% endfor %}
+
+                </span>
+
+                <span class="rating-number">
+                    {{ average_rating }}/5
+                </span>
+
+                <span class="rating-count">
+                    ({{ review_count }} reviews)
+                </span>
+
+            {% else %}
+
+                <span class="no-rating">
+                    No ratings yet
+                </span>
+
+            {% endif %}
+
+        </div>
+
+
+        <p class="product-description">
+            {{ product.description }}
+        </p>
+
+
+        <div class="product-detail-quantity">
+
+            <button
+                type="button"
+                onclick="decreaseQuantity()"
+            >
+                −
+            </button>
+
+            <span id="quantity">
+                1
+            </span>
+
+            <button
+                type="button"
+                onclick="increaseQuantity()"
+            >
+                +
+            </button>
+
+        </div>
+
+
+        <a
+            id="add-link"
+            href="/add_to_cart/{{ product.id }}?quantity=1"
+        >
+
+            <button
+                type="button"
+                class="detail-cart-button"
+            >
+                Add To Cart 🛒
+            </button>
+
+        </a>
+
+
+        {% if product.id in wishlist %}
+
+        <a
+            href="/remove_from_wishlist/{{ product.id }}"
+            class="detail-wishlist-button wishlist-added"
+        >
+            Remove From Wishlist ❤️
+        </a>
+
+        {% else %}
+
+        <a
+            href="/add_to_wishlist/{{ product.id }}"
+            class="detail-wishlist-button"
+        >
+            Add To Wishlist ❤️
+        </a>
+
+        {% endif %}
+
+
+        <a
+            href="/"
+            class="back-home"
+        >
+            ← Continue Shopping
+        </a>
+
+    </div>
+
+</section>
+
+
+<section class="reviews-section">
+
+    <div class="reviews-header">
+
+        <h2>
+            Customer Reviews ⭐
+        </h2>
+
+        <p>
+            Share your experience with this flower.
+        </p>
+
+    </div>
+
+
+    <div class="review-layout">
+
+
+        <!-- REVIEW FORM -->
+
+        <div class="card review-form-card">
+
+            <h3>
+                Write a Review ✍️
+            </h3>
+
+
+            <form
+                action="/add_review/{{ product.id }}"
+                method="POST"
+                class="review-form"
+            >
+
+                <label>
+                    Your Name
+                </label>
+
+                <input
+                    type="text"
+                    name="name"
+                    placeholder="Enter your name"
+                    maxlength="100"
+                    required
+                >
+
+
+                <label>
+                    Order ID
+                </label>
+
+                <input
+                    type="text"
+                    name="order_id"
+                    placeholder="Example: HB123456"
+                    maxlength="50"
+                    required
+                >
+
+
+                <label>
+                    Mobile Number
+                </label>
+
+                <input
+                    type="tel"
+                    name="mobile"
+                    placeholder="10-digit mobile number"
+                    maxlength="10"
+                    pattern="[0-9]{10}"
+                    required
+                >
+
+                <p class="review-help">
+                    Enter the Order ID and mobile number
+                    used while purchasing this flower.
+                    This helps us verify your purchase.
+                </p>
+
+
+                <label>
+                    Rating
+                </label>
+
+
+                <div class="star-selector">
+
+                    <input
+                        type="radio"
+                        id="star5"
+                        name="rating"
+                        value="5"
+                        required
+                    >
+
+                    <label for="star5">
+                        ★
+                    </label>
+
+
+                    <input
+                        type="radio"
+                        id="star4"
+                        name="rating"
+                        value="4"
+                    >
+
+                    <label for="star4">
+                        ★
+                    </label>
+
+
+                    <input
+                        type="radio"
+                        id="star3"
+                        name="rating"
+                        value="3"
+                    >
+
+                    <label for="star3">
+                        ★
+                    </label>
+
+
+                    <input
+                        type="radio"
+                        id="star2"
+                        name="rating"
+                        value="2"
+                    >
+
+                    <label for="star2">
+                        ★
+                    </label>
+
+
+                    <input
+                        type="radio"
+                        id="star1"
+                        name="rating"
+                        value="1"
+                    >
+
+                    <label for="star1">
+                        ★
+                    </label>
+
+                </div>
+
+
+                <label>
+                    Your Review
+                </label>
+
+                <textarea
+                    name="review"
+                    placeholder="Write your review..."
+                    maxlength="1000"
+                    required
+                ></textarea>
+
+
+                <button
+                    type="submit"
+                    class="submit-review-button"
+                >
+                    Submit Review ⭐
+                </button>
+
+            </form>
+
+        </div>
+
+
+        <!-- REVIEW LIST -->
+
+        <div class="review-list">
+
+            {% if reviews %}
+
+                {% for review in reviews %}
+
+                <div class="review-card">
+
+                    <div class="review-top">
+
+                        <div>
+
+                            <strong class="review-name">
+                                {{ review.name }}
+                            </strong>
+
+
+                            <div class="review-stars">
+
+                                {% for i in range(1, 6) %}
+
+                                    {% if i <= review.rating %}
+                                        ★
+                                    {% else %}
+                                        ☆
+                                    {% endif %}
+
+                                {% endfor %}
+
+                            </div>
+
+
+                            {% if review.get("verified_purchase", false) %}
+
+                            <span class="verified-badge">
+                                ✓ Verified Purchase
+                            </span>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <span class="review-date">
+                            {{ review.date }}
+                        </span>
+
+                    </div>
+
+
+                    <p class="review-text">
+                        {{ review.review }}
+                    </p>
+
+                </div>
+
+                {% endfor %}
+
+            {% else %}
+
+                <div class="no-reviews">
+
+                    <div class="no-reviews-icon">
+                        ⭐
+                    </div>
+
+                    <h3>
+                        No Reviews Yet
+                    </h3>
+
+                    <p>
+                        Be the first person to review this flower.
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<script>
+
+let quantity = 1;
+
+
+function increaseQuantity() {
+
+    if (quantity < 99) {
+
+        quantity++;
+
+        document.getElementById(
+            "quantity"
+        ).innerText = quantity;
+
+        updateAddLink();
+    }
+}
+
+
+function decreaseQuantity() {
+
+    if (quantity > 1) {
+
+        quantity--;
+
+        document.getElementById(
+            "quantity"
+        ).innerText = quantity;
+
+        updateAddLink();
+    }
+}
+
+
+function updateAddLink() {
+
+    document.getElementById(
+        "add-link"
+    ).href =
+        "/add_to_cart/{{ product.id }}?quantity=" +
+        quantity;
+}
+
+</script>
+
+{% endblock %}

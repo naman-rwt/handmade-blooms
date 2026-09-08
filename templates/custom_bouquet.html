@@ -1,0 +1,373 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Create Your Custom Bouquet 🌸</h1>
+
+<div class="card">
+
+    <h2>Choose Bouquet Size 💐</h2>
+
+    <label>
+        <input
+            type="radio"
+            name="size"
+            value="Small"
+            checked
+            onchange="calculatePrice()"
+        >
+        Small — ₹250
+    </label>
+
+    <br><br>
+
+    <label>
+        <input
+            type="radio"
+            name="size"
+            value="Medium"
+            onchange="calculatePrice()"
+        >
+        Medium — ₹500
+    </label>
+
+    <br><br>
+
+    <label>
+        <input
+            type="radio"
+            name="size"
+            value="Large"
+            onchange="calculatePrice()"
+        >
+        Large — ₹750
+    </label>
+
+
+    <hr>
+
+
+    <h2>Choose Extra Flowers 🌷</h2>
+
+    <p>
+        Each extra flower costs ₹50
+    </p>
+
+
+    <div class="flower-option">
+
+        <span>🌹 Rose</span>
+
+        <div class="quantity-box">
+
+            <button
+                type="button"
+                onclick="decreaseFlower('rose')"
+            >
+                -
+            </button>
+
+            <span id="rose">0</span>
+
+            <button
+                type="button"
+                onclick="increaseFlower('rose')"
+            >
+                +
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <br>
+
+
+    <div class="flower-option">
+
+        <span>🌻 Sunflower</span>
+
+        <div class="quantity-box">
+
+            <button
+                type="button"
+                onclick="decreaseFlower('sunflower')"
+            >
+                -
+            </button>
+
+            <span id="sunflower">0</span>
+
+            <button
+                type="button"
+                onclick="increaseFlower('sunflower')"
+            >
+                +
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <br>
+
+
+    <div class="flower-option">
+
+        <span>🌷 Lily</span>
+
+        <div class="quantity-box">
+
+            <button
+                type="button"
+                onclick="decreaseFlower('lily')"
+            >
+                -
+            </button>
+
+            <span id="lily">0</span>
+
+            <button
+                type="button"
+                onclick="increaseFlower('lily')"
+            >
+                +
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <hr>
+
+
+    <h2>Flower As Per Demand 🌺</h2>
+
+    <p>
+        Don't see the flower you want?
+        Tell us which flower you want us to make.
+    </p>
+
+
+    <label>
+        Flower Name
+    </label>
+
+    <input
+        type="text"
+        id="demand-flower"
+        placeholder="Example: Lavender"
+    >
+
+
+    <label>
+        Your Demand / Design
+    </label>
+
+    <textarea
+        id="demand-details"
+        placeholder="Tell us how you want the flower or design to look..."
+    ></textarea>
+
+
+    <hr>
+
+
+    <h2>Special Message 💌</h2>
+
+    <textarea
+        id="message"
+        placeholder="Example: Birthday bouquet for my friend"
+    ></textarea>
+
+
+    <hr>
+
+
+    <h2>Total Price</h2>
+
+    <h2 id="total-price">
+        ₹250
+    </h2>
+
+
+    <p>
+        <strong>
+            Please note: Custom orders cannot be cancelled after placing the order.
+        </strong>
+    </p>
+
+
+    <button
+        type="button"
+        onclick="addCustomBouquet()"
+    >
+        Add Custom Bouquet 🛒
+    </button>
+
+</div>
+
+
+<script>
+
+let flowerQuantities = {
+    rose: 0,
+    sunflower: 0,
+    lily: 0
+};
+
+
+function increaseFlower(flower) {
+
+    flowerQuantities[flower]++;
+
+    document.getElementById(flower).innerText =
+        flowerQuantities[flower];
+
+    calculatePrice();
+}
+
+
+function decreaseFlower(flower) {
+
+    if (flowerQuantities[flower] > 0) {
+
+        flowerQuantities[flower]--;
+
+        document.getElementById(flower).innerText =
+            flowerQuantities[flower];
+
+        calculatePrice();
+    }
+}
+
+
+function getBasePrice() {
+
+    let size =
+        document.querySelector(
+            'input[name="size"]:checked'
+        ).value;
+
+
+    if (size === "Small") {
+
+        return 250;
+
+    }
+
+
+    if (size === "Medium") {
+
+        return 500;
+
+    }
+
+
+    if (size === "Large") {
+
+        return 750;
+
+    }
+
+
+    return 250;
+}
+
+
+function calculatePrice() {
+
+    let basePrice =
+        getBasePrice();
+
+
+    let totalFlowers =
+        flowerQuantities.rose +
+        flowerQuantities.sunflower +
+        flowerQuantities.lily;
+
+
+    let extraPrice =
+        totalFlowers * 50;
+
+
+    let total =
+        basePrice +
+        extraPrice;
+
+
+    document.getElementById(
+        "total-price"
+    ).innerText =
+        "₹" + total;
+}
+
+
+function addCustomBouquet() {
+
+    let size =
+        document.querySelector(
+            'input[name="size"]:checked'
+        ).value;
+
+
+    let message =
+        document.getElementById(
+            "message"
+        ).value;
+
+
+    let demandFlower =
+        document.getElementById(
+            "demand-flower"
+        ).value;
+
+
+    let demandDetails =
+        document.getElementById(
+            "demand-details"
+        ).value;
+
+
+    let rose =
+        flowerQuantities.rose;
+
+
+    let sunflower =
+        flowerQuantities.sunflower;
+
+
+    let lily =
+        flowerQuantities.lily;
+
+
+    let extraFlowers =
+        rose +
+        sunflower +
+        lily;
+
+
+    let url =
+        "/add_custom_bouquet" +
+        "?size=" +
+        encodeURIComponent(size) +
+        "&extra_flowers=" +
+        extraFlowers +
+        "&demand_flower=" +
+        encodeURIComponent(demandFlower) +
+        "&demand_details=" +
+        encodeURIComponent(demandDetails) +
+        "&message=" +
+        encodeURIComponent(message);
+
+
+    window.location.href = url;
+}
+
+</script>
+
+
+{% endblock %}

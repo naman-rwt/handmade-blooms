@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>
+    Flower As Per Demand 🌺
+</h1>
+
+<div class="card">
+
+    <h2>
+        Tell Us What You Want 💐
+    </h2>
+
+    <p>
+        Don't see the flower or design
+        you are looking for?
+        Tell us your requirement.
+    </p>
+
+    <hr>
+
+    <h2>
+        Flower Name 🌸
+    </h2>
+
+    <input
+        type="text"
+        id="flower-name"
+        placeholder="Example: Lavender, Tulip, Lily..."
+    >
+
+    <br><br>
+
+    <h2>
+        Your Demand / Design ✨
+    </h2>
+
+    <textarea
+        id="demand-details"
+        placeholder="Example: I want a unique lavender flower design with purple wrapping and a small gift style bouquet."
+    ></textarea>
+
+    <hr>
+
+    <div class="custom-details">
+
+        <p>
+            💡 <strong>Note:</strong>
+        </p>
+
+        <p>
+            This is a special demand request.
+            The owner will check your requirement
+            and decide the final price.
+        </p>
+
+    </div>
+
+    <br>
+
+    <button
+        type="button"
+        onclick="submitDemand()"
+    >
+        Add Demand To Cart 🌺
+    </button>
+
+</div>
+
+
+<script>
+
+function submitDemand() {
+
+    let flowerName =
+        document.getElementById(
+            "flower-name"
+        ).value.trim();
+
+    let demandDetails =
+        document.getElementById(
+            "demand-details"
+        ).value.trim();
+
+
+    if (flowerName === "") {
+
+        alert(
+            "Please enter the flower name."
+        );
+
+        return;
+    }
+
+
+    if (demandDetails === "") {
+
+        alert(
+            "Please describe your demand or design."
+        );
+
+        return;
+    }
+
+
+    let url =
+        "/add_flower_demand" +
+        "?flower_name=" +
+        encodeURIComponent(
+            flowerName
+        ) +
+        "&demand_details=" +
+        encodeURIComponent(
+            demandDetails
+        );
+
+
+    window.location.href = url;
+}
+
+</script>
+
+{% endblock %}

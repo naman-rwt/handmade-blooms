@@ -1,0 +1,390 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="checkout-page">
+
+    <div class="checkout-header">
+
+        <h1>
+            Checkout 🌸
+        </h1>
+
+        <p>
+            Complete your details to place your Handmade Blooms order.
+        </p>
+
+    </div>
+
+
+    <div class="checkout-layout">
+
+
+        <!-- ============================= -->
+        <!-- CUSTOMER DETAILS -->
+        <!-- ============================= -->
+
+        <div class="card checkout-details">
+
+            <h2>
+                Delivery Details 📦
+            </h2>
+
+            <p class="checkout-subtitle">
+                Please enter your details carefully.
+            </p>
+
+
+            <form
+                action="/place_order"
+                method="POST"
+            >
+
+                <label>
+                    Name
+                </label>
+
+                <input
+                    type="text"
+                    name="name"
+                    placeholder="Enter your full name"
+                    required
+                >
+
+
+                <label>
+                    Email
+                </label>
+
+                <input
+                    type="email"
+                    name="email"
+                    placeholder="Enter your email address"
+                    required
+                >
+
+
+                <label>
+                    Mobile Number
+                </label>
+
+                <input
+                    type="tel"
+                    name="mobile"
+                    placeholder="Enter 10-digit mobile number"
+                    maxlength="10"
+                    minlength="10"
+                    pattern="[0-9]{10}"
+                    inputmode="numeric"
+                    required
+                >
+
+
+                <label>
+                    Full Address
+                </label>
+
+                <textarea
+                    name="address"
+                    placeholder="House/Flat No., Street, Area..."
+                    required
+                ></textarea>
+
+
+                <div class="checkout-row">
+
+                    <div class="checkout-field">
+
+                        <label>
+                            City
+                        </label>
+
+                        <input
+                            type="text"
+                            name="city"
+                            placeholder="Enter city"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="checkout-field">
+
+                        <label>
+                            State
+                        </label>
+
+                        <input
+                            type="text"
+                            name="state"
+                            placeholder="Enter state"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <label>
+                    Pincode
+                </label>
+
+                <input
+                    type="text"
+                    name="pincode"
+                    placeholder="Enter 6-digit pincode"
+                    maxlength="6"
+                    minlength="6"
+                    pattern="[0-9]{6}"
+                    inputmode="numeric"
+                    required
+                >
+
+
+                <button
+                    type="submit"
+                    class="place-order-button"
+                >
+                    Place Order 🌷
+                </button>
+
+            </form>
+
+        </div>
+
+
+        <!-- ============================= -->
+        <!-- ORDER SUMMARY -->
+        <!-- ============================= -->
+
+        <div class="card checkout-summary">
+
+            <h2>
+                Order Summary 🛒
+            </h2>
+
+
+            <div class="checkout-products">
+
+                {% for item in cart_items %}
+
+                <div class="checkout-product">
+
+                    <div class="checkout-product-info">
+
+                        <h3>
+                            {{ item.name }}
+                        </h3>
+
+                        <p>
+                            ₹{{ item.price }} × {{ item.quantity }}
+                        </p>
+
+                    </div>
+
+
+                    <strong>
+                        ₹{{ item.price * item.quantity }}
+                    </strong>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+
+            <div class="checkout-divider"></div>
+
+
+            <div class="checkout-total-row">
+
+                <span>
+                    Product Total
+                </span>
+
+                <strong>
+                    ₹{{ product_total }}
+                </strong>
+
+            </div>
+
+
+            <!-- ============================= -->
+            <!-- PRIVATE COUPON CODE -->
+            <!-- ============================= -->
+
+            <div class="coupon-section">
+
+                <h3>
+                    Have a Coupon? 🎟️
+                </h3>
+
+                {% if coupon_code %}
+
+                    <div class="coupon-applied">
+
+                        <div>
+
+                            <span class="coupon-success-icon">
+                                ✓
+                            </span>
+
+                            <div>
+
+                                <strong>
+                                    {{ coupon_code }}
+                                </strong>
+
+                                <p>
+                                    Coupon applied successfully.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <form
+                            action="/remove_coupon"
+                            method="POST"
+                        >
+
+                            <button
+                                type="submit"
+                                class="coupon-remove-button"
+                            >
+                                Remove
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                {% else %}
+
+                    <form
+                        action="/apply_coupon"
+                        method="POST"
+                        class="coupon-form"
+                    >
+
+                        <input
+                            type="text"
+                            name="coupon_code"
+                            placeholder="Enter coupon code"
+                            maxlength="30"
+                            autocomplete="off"
+                            required
+                        >
+
+                        <button
+                            type="submit"
+                        >
+                            Apply
+                        </button>
+
+                    </form>
+
+
+                    {% if coupon_error %}
+
+                    <p class="coupon-error">
+                        {{ coupon_error }}
+                    </p>
+
+                    {% endif %}
+
+                {% endif %}
+
+            </div>
+
+
+            {% if discount > 0 %}
+
+            <div class="checkout-total-row discount-row">
+
+                <span>
+                    Coupon Discount
+                </span>
+
+                <strong>
+                    -₹{{ discount }}
+                </strong>
+
+            </div>
+
+            {% endif %}
+
+
+            <div class="checkout-total-row">
+
+                <span>
+                    Delivery
+                </span>
+
+                <span class="delivery-at-checkout">
+                    ₹0 Pali / ₹99 Outside Pali
+                </span>
+
+            </div>
+
+
+            <div class="checkout-divider"></div>
+
+
+            <div class="checkout-final-total">
+
+                <span>
+                    Total Before Delivery
+                </span>
+
+                <strong>
+                    ₹{{ product_total - discount }}
+                </strong>
+
+            </div>
+
+
+            <div class="checkout-delivery-box">
+
+                <div class="delivery-icon">
+                    📦
+                </div>
+
+                <div>
+
+                    <strong>
+                        Delivery within 10 days
+                    </strong>
+
+                    <p>
+                        Your order will be delivered within 10 days.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="checkout-note">
+
+                <strong>
+                    Important:
+                </strong>
+
+                <span>
+                    Cancellation is not available after shipping.
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

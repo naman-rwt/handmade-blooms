@@ -1,0 +1,304 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="cart-page">
+
+```
+<div class="cart-header">
+
+    <h1>
+        Your Cart 🛒
+    </h1>
+
+    <p>
+        Review your items before checkout.
+    </p>
+
+</div>
+
+
+{% if cart_items %}
+
+<div class="cart-layout">
+
+    <!-- ================================= -->
+    <!-- CART ITEMS -->
+    <!-- ================================= -->
+
+    <div class="cart-items-section">
+
+        {% for item in cart_items %}
+
+        <div class="cart-item">
+
+            <!-- PRODUCT IMAGE -->
+
+            <div class="cart-item-image">
+
+                {% if item.image %}
+
+                <img
+                    src="{{ url_for(
+                        'static',
+                        filename='images/' + item.image
+                    ) }}"
+                    alt="{{ item.name }}"
+                >
+
+                {% else %}
+
+                <div class="cart-placeholder">
+
+                    {% if item.id.startswith("custom_") %}
+                        💐
+                    {% else %}
+                        🌺
+                    {% endif %}
+
+                </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- PRODUCT INFORMATION -->
+
+            <div class="cart-item-details">
+
+                <h2>
+                    {{ item.name }}
+                </h2>
+
+                <p class="cart-item-price">
+                    ₹{{ item.price }} each
+                </p>
+
+
+                <!-- ITEM SUBTOTAL -->
+
+                <p class="cart-item-subtotal">
+
+                    Subtotal:
+                    <strong>
+                        ₹{{ item.price * item.quantity }}
+                    </strong>
+
+                </p>
+
+
+                <!-- CUSTOM / DEMAND DETAILS -->
+
+                {% if item.message %}
+
+                <div class="custom-details">
+
+                    <p>
+                        <strong>
+                            {% if item.id.startswith("custom_") %}
+                                💐 Custom Bouquet Details
+                            {% else %}
+                                🌺 Demand Details
+                            {% endif %}
+                        </strong>
+                    </p>
+
+                    <p>
+                        {{ item.message }}
+                    </p>
+
+                </div>
+
+                {% endif %}
+
+
+                <!-- QUANTITY -->
+
+                <div class="quantity-box">
+
+                    <a href="/decrease/{{ item.id }}">
+
+                        <button
+                            type="button"
+                            aria-label="Decrease quantity"
+                        >
+                            −
+                        </button>
+
+                    </a>
+
+
+                    <span>
+                        {{ item.quantity }}
+                    </span>
+
+
+                    <a href="/increase/{{ item.id }}">
+
+                        <button
+                            type="button"
+                            aria-label="Increase quantity"
+                        >
+                            +
+                        </button>
+
+                    </a>
+
+                </div>
+
+            </div>
+
+
+            <!-- REMOVE -->
+
+            <div class="cart-item-remove">
+
+                <a href="/remove/{{ item.id }}">
+
+                    <button
+                        type="button"
+                        class="remove-button"
+                    >
+                        Remove ❌
+                    </button>
+
+                </a>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+
+    <!-- ================================= -->
+    <!-- ORDER SUMMARY -->
+    <!-- ================================= -->
+
+    <div class="cart-summary">
+
+        <h2>
+            Order Summary
+        </h2>
+
+
+        <div class="summary-row">
+
+            <span>
+                Products
+            </span>
+
+            <strong>
+                ₹{{ total }}
+            </strong>
+
+        </div>
+
+
+        <div class="summary-row">
+
+            <span>
+                Delivery
+            </span>
+
+            <strong>
+                Calculated at checkout
+            </strong>
+
+        </div>
+
+
+        <div class="summary-divider"></div>
+
+
+        <div class="summary-total">
+
+            <span>
+                Product Total
+            </span>
+
+            <strong>
+                ₹{{ total }}
+            </strong>
+
+        </div>
+
+
+        <p class="delivery-note">
+
+            🚚 Delivery is <strong>FREE in Pali</strong>.
+            <br>
+            Outside Pali, delivery charge is <strong>₹99</strong>.
+
+        </p>
+
+
+        <a
+            href="/checkout"
+            class="checkout-link"
+        >
+
+            <button
+                type="button"
+                class="checkout-button"
+            >
+                Proceed To Checkout →
+            </button>
+
+        </a>
+
+
+        <a
+            href="/"
+            class="continue-shopping"
+        >
+            ← Continue Shopping
+        </a>
+
+    </div>
+
+</div>
+
+
+{% else %}
+
+<!-- ================================= -->
+<!-- EMPTY CART -->
+<!-- ================================= -->
+
+<div class="empty-cart">
+
+    <div class="empty-cart-icon">
+        🛒
+    </div>
+
+    <h2>
+        Your cart is empty 🌸
+    </h2>
+
+    <p>
+        Looks like you haven't added anything yet.
+    </p>
+
+    <a href="/">
+
+        <button
+            type="button"
+            class="continue-shopping-button"
+        >
+            Start Shopping 🌷
+        </button>
+
+    </a>
+
+</div>
+
+{% endif %}
+```
+
+</div>
+
+{% endblock %}

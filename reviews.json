@@ -1,0 +1,40 @@
+[
+    {
+        "id": "review_699503_1799",
+        "product_id": "rose",
+        "product_name": "Rose",
+        "name": "naman",
+        "rating": 5,
+        "review": "suiiiiiii",
+        "date": "07-09-2026",
+        "order_id": "HB123456",
+        "verified_purchase": false,
+        "approved": true
+    },
+    {
+        "id": "review_994212_4844",
+        "product_id": "rose",
+        "product_name": "Rose",
+        "name": "naman",
+        "rating": 5,
+        "review": "wowow",
+        "date": "08-09-2026",
+        "order_id": "HB805150",
+        "mobile": "7726824244",
+        "verified_purchase": true,
+        "approved": true
+    },
+    {
+        "id": "review_791141_4540",
+        "product_id": "sunflower",
+        "product_name": "Sunflower",
+        "name": "naman",
+        "rating": 5,
+        "review": "naman",
+        "date": "08-09-2026",
+        "order_id": "HB717285",
+        "mobile": "7726824244",
+        "verified_purchase": true,
+        "approved": true
+    }
+]

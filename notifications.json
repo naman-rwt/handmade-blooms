@@ -1,0 +1,101 @@
+[
+    {
+        "id": "notification_889175_9816",
+        "type": "new_review",
+        "title": "New Review Received ⭐",
+        "message": "naman submitted a review for Sunflower.",
+        "order_id": "HB717285",
+        "date": "08-09-2026 04:09 PM",
+        "read": true
+    },
+    {
+        "id": "notification_623540_7708",
+        "type": "new_order",
+        "title": "New Order Received 🛒",
+        "message": "New order HB717285 placed by Aarti Rawat. Total: ₹150",
+        "order_id": "HB717285",
+        "date": "08-09-2026 04:03 PM",
+        "read": true
+    },
+    {
+        "id": "notification_752358_7141",
+        "type": "new_review",
+        "title": "New Review Received ⭐",
+        "message": "naman submitted a review for Rose.",
+        "order_id": "HB805150",
+        "date": "08-09-2026 03:54 PM",
+        "read": true
+    },
+    {
+        "id": "notification_268362_3970",
+        "type": "new_order",
+        "title": "New Order Received 🛒",
+        "message": "New order HB805150 placed by Aarti Rawat. Total: ₹126",
+        "order_id": "HB805150",
+        "date": "07-09-2026 11:11 PM",
+        "read": true
+    },
+    {
+        "id": "notification_718993_9108",
+        "type": "new_review",
+        "title": "New Review Received ⭐",
+        "message": "naman submitted a review for Rose.",
+        "order_id": "HB123456",
+        "date": "07-09-2026 10:51 PM",
+        "read": true
+    },
+    {
+        "id": "notification_592291_6939",
+        "type": "new_order",
+        "title": "New Order Received 🛒",
+        "message": "New order HB582256 placed by naman. Total: ₹399",
+        "order_id": "HB582256",
+        "date": "07-09-2026 10:09 PM",
+        "read": true
+    },
+    {
+        "id": "notification_225066_6264",
+        "type": "new_order",
+        "title": "New Order Received 🛒",
+        "message": "New order HB178219 placed by naman. Total: ₹150",
+        "order_id": "HB178219",
+        "date": "07-09-2026 10:02 PM",
+        "read": true
+    },
+    {
+        "id": "notification_849281_8002",
+        "type": "new_order",
+        "title": "New Order Received 🛒",
+        "message": "New order HB705422 placed by naman. Total: ₹300",
+        "order_id": "HB705422",
+        "date": "07-09-2026 09:52 PM",
+        "read": true
+    },
+    {
+        "id": "notification_999039_4608",
+        "type": "new_order",
+        "title": "New Order Received 🛒",
+        "message": "New order HB149286 placed by naman. Total: ₹150",
+        "order_id": "HB149286",
+        "date": "07-09-2026 09:44 PM",
+        "read": true
+    },
+    {
+        "id": "notification_491653_9059",
+        "type": "cancelled_order",
+        "title": "Order Cancelled ❌",
+        "message": "Customer naman cancelled order HB664526.",
+        "order_id": "HB664526",
+        "date": "07-09-2026 07:43 PM",
+        "read": true
+    },
+    {
+        "id": "notification_424559_4286",
+        "type": "new_order",
+        "title": "New Order Received 🛒",
+        "message": "New order HB664526 placed by naman. Total: ₹300",
+        "order_id": "HB664526",
+        "date": "07-09-2026 07:42 PM",
+        "read": true
+    }
+]

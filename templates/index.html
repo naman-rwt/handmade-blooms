@@ -1,0 +1,706 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+/* PRODUCT SEARCH + SORT */
+
+.products-section {
+    width: 100%;
+}
+
+.products-heading {
+    text-align: center;
+    margin: 35px 0 20px;
+}
+
+.products-heading h2 {
+    margin: 0;
+    font-size: 32px;
+    color: #333;
+}
+
+.products-heading p {
+    margin-top: 8px;
+    color: #777;
+    font-size: 15px;
+}
+
+.product-tools {
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto 30px;
+    padding: 0 20px;
+    box-sizing: border-box;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.product-search {
+    flex: 1;
+}
+
+.product-search input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 14px 20px;
+    border: 2px solid #ffd0df;
+    border-radius: 30px;
+    outline: none;
+    font-size: 16px;
+    background: white;
+    color: #333;
+    box-shadow: 0 5px 18px rgba(255, 105, 150, 0.08);
+}
+
+.product-search input:focus {
+    border-color: #ff6fa5;
+}
+
+.product-sort select {
+    padding: 14px 16px;
+    border: 2px solid #ffd0df;
+    border-radius: 30px;
+    outline: none;
+    font-size: 15px;
+    background: white;
+    color: #444;
+    cursor: pointer;
+}
+
+.no-products {
+    width: 100%;
+    text-align: center;
+    padding: 45px 20px;
+    box-sizing: border-box;
+}
+
+.no-products-icon {
+    font-size: 45px;
+    margin-bottom: 10px;
+}
+
+.no-products h3 {
+    margin: 0;
+    color: #444;
+    font-size: 24px;
+}
+
+.no-products p {
+    color: #888;
+    margin-top: 8px;
+}
+
+
+/* =========================================
+   PRODUCT RATING ON HOMEPAGE
+   ========================================= */
+
+.home-product-rating {
+    min-height: 24px;
+    margin: 5px 0 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.home-rating-stars {
+    color: #ffb400;
+    font-size: 18px;
+    letter-spacing: 1px;
+}
+
+.home-rating-number {
+    color: #555;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.home-rating-count {
+    color: #888;
+    font-size: 12px;
+}
+
+.home-no-rating {
+    color: #aaa;
+    font-size: 12px;
+}
+
+
+/* =========================================
+   MOBILE
+   ========================================= */
+
+@media (max-width: 700px) {
+
+    .products-heading {
+        margin-top: 25px;
+    }
+
+    .products-heading h2 {
+        font-size: 26px;
+    }
+
+    .product-tools {
+        flex-direction: column;
+        padding: 0 15px;
+    }
+
+    .product-search {
+        width: 100%;
+    }
+
+    .product-sort {
+        width: 100%;
+    }
+
+    .product-sort select {
+        width: 100%;
+    }
+
+    .product-search input {
+        padding: 13px 17px;
+        font-size: 15px;
+    }
+}
+</style>
+
+
+<section class="hero">
+
+    <h1>
+        Handmade Blooms
+    </h1>
+
+    <p>
+        Beautiful Handmade Flower Bouquets
+        Crafted With Love 🌷
+    </p>
+
+</section>
+
+
+<!-- CUSTOM OPTIONS -->
+
+<section class="custom-bouquet-option">
+
+    <div class="card custom-card">
+
+        <div class="custom-icon">
+            💐
+        </div>
+
+        <h2>
+            Create Your Custom Bouquet
+        </h2>
+
+        <p>
+            Choose your bouquet size,
+            add extra flowers and write
+            your special message.
+        </p>
+
+        <a href="/custom_bouquet">
+
+            <button type="button">
+                Create Custom Bouquet 💐
+            </button>
+
+        </a>
+
+    </div>
+
+
+    <div class="card custom-card">
+
+        <div class="custom-icon">
+            🌺
+        </div>
+
+        <h2>
+            Flower As Per Demand
+        </h2>
+
+        <p>
+            Don't see your favourite flower?
+            Tell us the flower name and
+            your own design or requirement.
+        </p>
+
+        <a href="/flower_demand">
+
+            <button type="button">
+                Give Your Demand 🌺
+            </button>
+
+        </a>
+
+    </div>
+
+</section>
+
+
+<!-- NORMAL PRODUCTS -->
+
+<section class="products-section">
+
+    <div class="products-heading">
+
+        <h2>
+            Our Flowers 🌸
+        </h2>
+
+        <p>
+            Choose your favourite flowers
+        </p>
+
+    </div>
+
+
+    <!-- SEARCH + SORT -->
+
+    <div class="product-tools">
+
+        <div class="product-search">
+
+            <input
+                type="text"
+                id="productSearch"
+                placeholder="Search flowers... 🔍"
+                onkeyup="searchProducts()"
+            >
+
+        </div>
+
+
+        <div class="product-sort">
+
+            <select
+                id="sortProducts"
+                onchange="sortProducts()"
+            >
+
+                <option value="default">
+                    Sort By
+                </option>
+
+                <option value="price-low">
+                    Price: Low to High
+                </option>
+
+                <option value="price-high">
+                    Price: High to Low
+                </option>
+
+                <option value="name">
+                    Name: A to Z
+                </option>
+
+            </select>
+
+        </div>
+
+    </div>
+
+
+    <section
+        class="products"
+        id="productsContainer"
+    >
+
+        {% for product in products %}
+
+        <div
+            class="card product-card"
+            data-product-name="{{ product.name | lower }}"
+            data-product-price="{{ product.price }}"
+        >
+
+            <a href="/product/{{ product.id }}">
+
+                <img
+                    src="{{ url_for(
+                        'static',
+                        filename='images/' + product.image
+                    ) }}"
+                    alt="{{ product.name }}"
+                >
+
+            </a>
+
+
+            <h2>
+                {{ product.name }}
+            </h2>
+
+
+            <p>
+                ₹{{ product.price }}
+            </p>
+
+
+            <!-- PRODUCT RATING -->
+
+            {% set rating = product_ratings.get(product.id, {}) %}
+
+            <div class="home-product-rating">
+
+                {% if rating.get("count", 0) > 0 %}
+
+                    <span class="home-rating-stars">
+
+                        {% for i in range(1, 6) %}
+
+                            {% if i <= rating.get("average", 0) %}
+                                ★
+                            {% else %}
+                                ☆
+                            {% endif %}
+
+                        {% endfor %}
+
+                    </span>
+
+                    <span class="home-rating-number">
+                        {{ rating.get("average", 0) }}/5
+                    </span>
+
+                    <span class="home-rating-count">
+                        ({{ rating.get("count", 0) }} reviews)
+                    </span>
+
+                {% else %}
+
+                    <span class="home-no-rating">
+                        No ratings yet
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+
+            <div class="quantity-box">
+
+                <button
+                    type="button"
+                    onclick="decreaseQuantity(
+                        '{{ product.id }}'
+                    )"
+                >
+                    −
+                </button>
+
+
+                <span
+                    id="quantity-{{ product.id }}"
+                >
+                    1
+                </span>
+
+
+                <button
+                    type="button"
+                    onclick="increaseQuantity(
+                        '{{ product.id }}'
+                    )"
+                >
+                    +
+                </button>
+
+            </div>
+
+
+            <a
+                id="add-link-{{ product.id }}"
+                href="/add_to_cart/{{ product.id }}?quantity=1"
+            >
+
+                <button type="button">
+                    Add To Cart 🛒
+                </button>
+
+            </a>
+
+        </div>
+
+        {% endfor %}
+
+    </section>
+
+
+    <div
+        class="no-products"
+        id="noProducts"
+        style="display: none;"
+    >
+
+        <div class="no-products-icon">
+            🌸
+        </div>
+
+        <h3>
+            No Flowers Found
+        </h3>
+
+        <p>
+            Try searching for another flower.
+        </p>
+
+    </div>
+
+</section>
+
+
+<script>
+
+function increaseQuantity(productId) {
+
+    let quantityElement =
+        document.getElementById(
+            "quantity-" + productId
+        );
+
+    let quantity =
+        parseInt(
+            quantityElement.innerText
+        );
+
+    if (quantity < 99) {
+
+        quantity++;
+
+        quantityElement.innerText =
+            quantity;
+
+        updateAddLink(
+            productId,
+            quantity
+        );
+    }
+}
+
+
+function decreaseQuantity(productId) {
+
+    let quantityElement =
+        document.getElementById(
+            "quantity-" + productId
+        );
+
+    let quantity =
+        parseInt(
+            quantityElement.innerText
+        );
+
+    if (quantity > 1) {
+
+        quantity--;
+
+        quantityElement.innerText =
+            quantity;
+
+        updateAddLink(
+            productId,
+            quantity
+        );
+    }
+}
+
+
+function updateAddLink(
+    productId,
+    quantity
+) {
+
+    let addLink =
+        document.getElementById(
+            "add-link-" + productId
+        );
+
+    addLink.href =
+        "/add_to_cart/" +
+        productId +
+        "?quantity=" +
+        quantity;
+}
+
+
+function searchProducts() {
+
+    let searchInput =
+        document.getElementById(
+            "productSearch"
+        );
+
+    let searchText =
+        searchInput.value
+            .toLowerCase()
+            .trim();
+
+
+    let productCards =
+        document.querySelectorAll(
+            ".product-card"
+        );
+
+
+    let visibleProducts = 0;
+
+
+    productCards.forEach(function(card) {
+
+        let productName =
+            card.getAttribute(
+                "data-product-name"
+            );
+
+
+        if (
+            productName.includes(searchText)
+        ) {
+
+            card.style.display = "";
+
+            visibleProducts++;
+
+        } else {
+
+            card.style.display = "none";
+
+        }
+
+    });
+
+
+    let noProducts =
+        document.getElementById(
+            "noProducts"
+        );
+
+
+    if (
+        searchText !== "" &&
+        visibleProducts === 0
+    ) {
+
+        noProducts.style.display =
+            "block";
+
+    } else {
+
+        noProducts.style.display =
+            "none";
+
+    }
+}
+
+
+function sortProducts() {
+
+    let sortValue =
+        document.getElementById(
+            "sortProducts"
+        ).value;
+
+
+    let container =
+        document.getElementById(
+            "productsContainer"
+        );
+
+
+    let cards =
+        Array.from(
+            container.querySelectorAll(
+                ".product-card"
+            )
+        );
+
+
+    if (sortValue === "price-low") {
+
+        cards.sort(function(a, b) {
+
+            return (
+                parseInt(
+                    a.getAttribute(
+                        "data-product-price"
+                    )
+                )
+                -
+                parseInt(
+                    b.getAttribute(
+                        "data-product-price"
+                    )
+                )
+            );
+
+        });
+
+    }
+
+
+    else if (sortValue === "price-high") {
+
+        cards.sort(function(a, b) {
+
+            return (
+                parseInt(
+                    b.getAttribute(
+                        "data-product-price"
+                    )
+                )
+                -
+                parseInt(
+                    a.getAttribute(
+                        "data-product-price"
+                    )
+                )
+            );
+
+        });
+
+    }
+
+
+    else if (sortValue === "name") {
+
+        cards.sort(function(a, b) {
+
+            let nameA =
+                a.getAttribute(
+                    "data-product-name"
+                );
+
+            let nameB =
+                b.getAttribute(
+                    "data-product-name"
+                );
+
+
+            return nameA.localeCompare(
+                nameB
+            );
+
+        });
+
+    }
+
+
+    cards.forEach(function(card) {
+
+        container.appendChild(card);
+
+    });
+
+
+    searchProducts();
+}
+
+</script>
+
+{% endblock %}

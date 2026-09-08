@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="confirmation-page">
+
+    <div class="confirmation-success">
+        <div class="success-icon">✓</div>
+
+        <h1>Order Placed Successfully! 🌸</h1>
+
+        <p>
+            Thank you for shopping with Handmade Blooms.
+        </p>
+
+        <div class="confirmation-order-id">
+            <span>Order ID</span>
+            <strong>{{ order["order_id"] }}</strong>
+        </div>
+    </div>
+
+
+    <div class="confirmation-layout">
+
+        <!-- CUSTOMER DETAILS -->
+
+        <div class="confirmation-card">
+
+            <h2>📦 Delivery Details</h2>
+
+            <div class="confirmation-info">
+
+                <div>
+                    <span>Name</span>
+                    <strong>{{ order["name"] }}</strong>
+                </div>
+
+                <div>
+                    <span>Email</span>
+                    <strong>{{ order["email"] }}</strong>
+                </div>
+
+                <div>
+                    <span>Mobile</span>
+                    <strong>{{ order["mobile"] }}</strong>
+                </div>
+
+                <div>
+                    <span>Address</span>
+                    <strong>
+                        {{ order["address"] }},
+                        {{ order["city"] }},
+                        {{ order["state"] }} -
+                        {{ order["pincode"] }}
+                    </strong>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ORDER SUMMARY -->
+
+        <div class="confirmation-card">
+
+            <h2>🛒 Order Summary</h2>
+
+            <div class="confirmation-items">
+
+                {% for item in order["items"] %}
+
+                <div class="confirmation-item">
+
+                    <div>
+                        <strong>{{ item["name"] }}</strong>
+
+                        <span>
+                            ₹{{ item["price"] }} × {{ item["quantity"] }}
+                        </span>
+                    </div>
+
+                    <strong>
+                        ₹{{ item["price"] * item["quantity"] }}
+                    </strong>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+            <div class="confirmation-divider"></div>
+
+            <div class="confirmation-total">
+                <span>Product Total</span>
+                <strong>₹{{ order["product_total"] }}</strong>
+            </div>
+
+            <div class="confirmation-total">
+                <span>Delivery Charge</span>
+                <strong>₹{{ order["delivery_charge"] }}</strong>
+            </div>
+
+            <div class="confirmation-divider"></div>
+
+            <div class="confirmation-final-total">
+                <span>Total Amount</span>
+                <strong>₹{{ order["total"] }}</strong>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- DELIVERY INFORMATION -->
+
+    <div class="confirmation-delivery">
+
+        <div class="confirmation-delivery-icon">
+            🚚
+        </div>
+
+        <div>
+            <h3>Delivery within 10 days</h3>
+
+            <p>
+                Your order will be delivered within 10 days.
+                We will process your order as soon as possible.
+            </p>
+        </div>
+
+    </div>
+
+
+    <!-- STATUS -->
+
+    <div class="confirmation-status">
+
+        <span>Order Status</span>
+
+        <strong>
+            {{ order["status"] }}
+        </strong>
+
+    </div>
+
+
+    <!-- BUTTONS -->
+
+    <div class="confirmation-actions">
+
+        <a href="/track_order">
+            <button type="button">
+                Track My Order 📦
+            </button>
+        </a>
+
+        <a href="/">
+            <button type="button" class="confirmation-home-button">
+                Continue Shopping 🌷
+            </button>
+        </a>
+
+    </div>
+
+</section>
+
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="wishlist-page">
+
+    <div class="wishlist-header">
+        <h1>My Wishlist ❤️</h1>
+        <p>Your favourite flowers, saved in one place.</p>
+    </div>
+
+    {% if wishlist_products %}
+
+    <div class="wishlist-grid">
+
+        {% for product in wishlist_products %}
+
+        <div class="wishlist-card">
+
+            <a href="/product/{{ product.id }}" class="wishlist-image-link">
+
+                <div class="wishlist-image">
+                    <img
+                        src="{{ url_for('static', filename='images/' + product.image) }}"
+                        alt="{{ product.name }}"
+                    >
+                </div>
+
+            </a>
+
+            <div class="wishlist-info">
+
+                <h2>{{ product.name }}</h2>
+
+                <div class="wishlist-price">
+                    ₹{{ product.price }}
+                </div>
+
+                <p class="wishlist-description">
+                    {{ product.description }}
+                </p>
+
+                <div class="wishlist-actions">
+
+                    <a
+                        href="/wishlist/add_to_cart/{{ product.id }}"
+                        class="wishlist-cart-button"
+                    >
+                        Add To Cart 🛒
+                    </a>
+
+                    <a
+                        href="/remove_from_wishlist/{{ product.id }}"
+                        class="wishlist-remove-button"
+                    >
+                        Remove ❤️
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+    {% else %}
+
+    <div class="wishlist-empty">
+
+        <div class="wishlist-empty-icon">
+            ❤️
+        </div>
+
+        <h2>Your Wishlist Is Empty</h2>
+
+        <p>
+            Save your favourite handmade flowers here.
+        </p>
+
+        <a href="/" class="wishlist-shop-button">
+            Continue Shopping 🌸
+        </a>
+
+    </div>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}
