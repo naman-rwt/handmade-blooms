@@ -25,10 +25,9 @@ ADMIN_PASSWORD = "HBadmin123"
 # =========================================
 # Paste your Razorpay TEST Key ID and TEST Key Secret here.
 # Never share the Key Secret with anyone.
-RAZORPAY_KEY_ID = "rzp_test_TbY41mYXGAlvtb"
-RAZORPAY_KEY_SECRET = "26rGTCXWiE51ipz4tBPZrR43"
-print("KEY =", RAZORPAY_KEY_ID)
-print("SECRET =", RAZORPAY_KEY_SECRET)
+
+RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID")
+RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
 
 razorpay_client = razorpay.Client(
     auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET)
