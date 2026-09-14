@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div style="max-width:650px;margin:50px auto;padding:35px;background:white;border-radius:18px;box-shadow:0 5px 20px rgba(0,0,0,0.08);text-align:center;">
+
+    <div style="font-size:55px;margin-bottom:10px;">
+        ❌
+    </div>
+
+    <h1 style="color:#d9534f;margin-bottom:10px;">
+        Payment Failed
+    </h1>
+
+    <p style="color:#666;font-size:16px;line-height:1.6;">
+        Your payment was not completed.
+        Don't worry — your cart has not been cleared.
+        You can go back and try again.
+    </p>
+
+    <div style="margin-top:28px;">
+
+        <a href="{{ url_for('checkout') }}"
+           style="display:inline-block;background:#e75480;color:white;text-decoration:none;padding:13px 25px;border-radius:10px;font-weight:bold;margin:5px;">
+            Try Again
+        </a>
+
+        <a href="{{ url_for('cart') }}"
+           style="display:inline-block;background:#f3f3f3;color:#333;text-decoration:none;padding:13px 25px;border-radius:10px;font-weight:bold;margin:5px;">
+            Back to Cart
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -2,53 +2,517 @@
 
 {% block content %}
 
-<div class="tracking-page">
+<style>
 
-    <div class="tracking-header">
+    .my-orders-page {
+        max-width: 1050px;
+        margin: 0 auto;
+        padding: 30px 18px 60px;
+    }
+
+    .orders-hero {
+        text-align: center;
+        margin-bottom: 28px;
+    }
+
+    .orders-hero h1 {
+        margin: 0;
+        font-size: 34px;
+        color: #333;
+    }
+
+    .orders-hero p {
+        margin: 9px 0 0;
+        color: #777;
+        font-size: 15px;
+    }
+
+    .orders-search-card {
+        background: white;
+        border-radius: 18px;
+        padding: 22px;
+        margin-bottom: 28px;
+        box-shadow: 0 6px 22px rgba(0, 0, 0, 0.07);
+        border: 1px solid #f2dce4;
+    }
+
+    .orders-search-card h3 {
+        margin: 0 0 6px;
+        color: #333;
+    }
+
+    .orders-search-card p {
+        margin: 0 0 16px;
+        color: #777;
+        font-size: 14px;
+    }
+
+    .orders-search-form {
+        display: flex;
+        gap: 10px;
+    }
+
+    .orders-search-form input {
+        flex: 1;
+        min-width: 0;
+        padding: 13px 15px;
+        border: 1px solid #ddd;
+        border-radius: 11px;
+        font-size: 15px;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+    .orders-search-form input:focus {
+        border-color: #ff6fa5;
+        box-shadow: 0 0 0 3px rgba(255, 111, 165, 0.12);
+    }
+
+    .orders-search-form button {
+        border: none;
+        border-radius: 11px;
+        padding: 13px 22px;
+        background: #ff6fa5;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 15px;
+    }
+
+    .orders-search-form button:hover {
+        opacity: 0.9;
+    }
+
+    .orders-error {
+        background: #fff1f1;
+        color: #b42318;
+        border: 1px solid #ffd0d0;
+        padding: 15px 17px;
+        border-radius: 13px;
+        margin-bottom: 22px;
+    }
+
+    .orders-error strong {
+        display: block;
+        margin-bottom: 3px;
+    }
+
+    .orders-count {
+        margin: 0 0 14px;
+        color: #666;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .orders-list {
+        display: grid;
+        gap: 22px;
+    }
+
+    .order-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
+        border: 1px solid #f0e1e7;
+    }
+
+    .order-top {
+        padding: 21px 22px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 15px;
+        background: linear-gradient(
+            135deg,
+            #fff7fa,
+            #ffffff
+        );
+    }
+
+    .order-id-label {
+        display: block;
+        color: #999;
+        font-size: 11px;
+        font-weight: bold;
+        letter-spacing: 1px;
+        margin-bottom: 5px;
+    }
+
+    .order-id {
+        margin: 0;
+        color: #333;
+        font-size: 21px;
+    }
+
+    .order-date {
+        margin: 6px 0 0;
+        color: #888;
+        font-size: 13px;
+    }
+
+    .status-badge {
+        padding: 8px 13px;
+        border-radius: 30px;
+        font-size: 13px;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
+    .status-pending {
+        background: #fff4d6;
+        color: #9a6700;
+    }
+
+    .status-processing {
+        background: #eaf3ff;
+        color: #1769aa;
+    }
+
+    .status-shipped {
+        background: #eee9ff;
+        color: #6546b8;
+    }
+
+    .status-delivered {
+        background: #e7f8ee;
+        color: #168044;
+    }
+
+    .status-cancelled {
+        background: #ffe8e8;
+        color: #c62828;
+    }
+
+    .order-divider {
+        height: 1px;
+        background: #f1e6ea;
+    }
+
+    .order-delivery {
+        padding: 17px 22px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        background: #fffafd;
+    }
+
+    .delivery-label {
+        color: #888;
+        font-size: 13px;
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    .delivery-date {
+        color: #333;
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .delivery-icon {
+        font-size: 27px;
+    }
+
+    .order-items {
+        padding: 20px 22px;
+    }
+
+    .order-section-title {
+        margin: 0 0 14px;
+        font-size: 17px;
+        color: #333;
+    }
+
+    .item-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        padding: 13px 0;
+        border-bottom: 1px solid #f2edf0;
+    }
+
+    .item-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .item-name {
+        margin: 0 0 5px;
+        color: #333;
+        font-size: 15px;
+    }
+
+    .item-meta {
+        margin: 0;
+        color: #888;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    .item-price {
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    .item-price span {
+        display: block;
+        color: #999;
+        font-size: 12px;
+        margin-bottom: 3px;
+    }
+
+    .item-price strong {
+        color: #333;
+        font-size: 15px;
+    }
+
+    .special-details {
+        margin-top: 9px;
+        padding: 9px 11px;
+        background: #fff7fa;
+        border-radius: 9px;
+        color: #666;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .special-details strong {
+        color: #d84d82;
+    }
+
+    .payment-summary {
+        padding: 20px 22px;
+        background: #fcfafb;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        padding: 7px 0;
+        color: #666;
+        font-size: 14px;
+    }
+
+    .summary-row strong {
+        color: #333;
+    }
+
+    .summary-total {
+        margin-top: 8px;
+        padding-top: 14px;
+        border-top: 1px dashed #ddd;
+        color: #333;
+        font-size: 17px;
+        font-weight: bold;
+    }
+
+    .summary-total strong {
+        color: #e24d86;
+        font-size: 21px;
+    }
+
+    .order-actions {
+        padding: 17px 22px 21px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .track-button {
+        flex: 1;
+        min-width: 180px;
+        text-align: center;
+        text-decoration: none;
+        padding: 12px 16px;
+        border-radius: 11px;
+        background: #ff6fa5;
+        color: white;
+        font-weight: bold;
+        box-sizing: border-box;
+    }
+
+    .track-button:hover {
+        opacity: 0.9;
+    }
+
+    .cancel-button {
+        padding: 12px 16px;
+        border: 1px solid #f1b7b7;
+        border-radius: 11px;
+        background: white;
+        color: #c62828;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .cancel-button:hover {
+        background: #fff3f3;
+    }
+
+    .info-note {
+        margin: 0 22px 21px;
+        padding: 13px 15px;
+        border-radius: 11px;
+        background: #fff8e8;
+        border: 1px solid #f5dfaa;
+        color: #806000;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .cancelled-note {
+        background: #fff1f1;
+        border-color: #ffd0d0;
+        color: #a32929;
+    }
+
+    .no-orders {
+        background: white;
+        text-align: center;
+        padding: 45px 20px;
+        border-radius: 20px;
+        box-shadow: 0 7px 25px rgba(0, 0, 0, 0.07);
+    }
+
+    .no-orders-icon {
+        font-size: 48px;
+        margin-bottom: 10px;
+    }
+
+    .no-orders h2 {
+        margin: 0 0 8px;
+        color: #333;
+    }
+
+    .no-orders p {
+        margin: 0;
+        color: #888;
+    }
+
+    @media (max-width: 650px) {
+
+        .my-orders-page {
+            padding: 22px 12px 45px;
+        }
+
+        .orders-hero h1 {
+            font-size: 28px;
+        }
+
+        .orders-search-card {
+            padding: 17px;
+        }
+
+        .orders-search-form {
+            flex-direction: column;
+        }
+
+        .orders-search-form button {
+            width: 100%;
+        }
+
+        .order-top {
+            padding: 17px;
+        }
+
+        .order-id {
+            font-size: 18px;
+        }
+
+        .status-badge {
+            padding: 7px 10px;
+            font-size: 12px;
+        }
+
+        .order-delivery,
+        .order-items,
+        .payment-summary {
+            padding-left: 17px;
+            padding-right: 17px;
+        }
+
+        .order-actions {
+            padding: 15px 17px 18px;
+            flex-direction: column;
+        }
+
+        .track-button {
+            width: 100%;
+            min-width: 0;
+        }
+
+        .cancel-button {
+            width: 100%;
+        }
+
+        .info-note {
+            margin-left: 17px;
+            margin-right: 17px;
+        }
+
+        .item-row {
+            align-items: flex-start;
+        }
+
+        .item-name {
+            font-size: 14px;
+        }
+    }
+
+</style>
+
+
+<div class="my-orders-page">
+
+    <!-- HEADER -->
+
+    <div class="orders-hero">
 
         <h1>
             My Orders 📦
         </h1>
 
         <p>
-            View your orders, delivery information
-            and current order status.
+            Track your purchases and check delivery information.
         </p>
 
     </div>
 
 
-    <!-- MOBILE SEARCH -->
+    <!-- SEARCH -->
 
-    <div class="card tracking-search-card">
+    <div class="orders-search-card">
 
-        <form action="/my_orders" method="POST">
+        <h3>
+            🔎 Find Your Orders
+        </h3>
 
-            <div class="tracking-form-group">
+        <p>
+            Enter the mobile number used while placing your order.
+        </p>
 
-                <label>
-                    Mobile Number
-                </label>
+        <form
+            action="/my_orders"
+            method="POST"
+            class="orders-search-form"
+        >
 
-                <input
-                    type="tel"
-                    name="mobile"
-                    placeholder="Enter 10-digit mobile number"
-                    maxlength="10"
-                    minlength="10"
-                    pattern="[0-9]{10}"
-                    inputmode="numeric"
-                    value="{{ mobile }}"
-                    required
-                >
-
-            </div>
-
-            <button
-                type="submit"
-                class="track-button"
+            <input
+                type="tel"
+                name="mobile"
+                value="{{ mobile }}"
+                placeholder="Enter 10-digit mobile number"
+                maxlength="10"
+                pattern="[0-9]{10}"
+                inputmode="numeric"
+                required
             >
-                View My Orders 🔍
+
+            <button type="submit">
+                View Orders
             </button>
 
         </form>
@@ -60,7 +524,7 @@
 
     {% if error %}
 
-    <div class="tracking-note">
+    <div class="orders-error">
 
         <strong>
             ⚠️ {{ error }}
@@ -75,24 +539,28 @@
 
     {% if orders %}
 
-        <div class="my-orders-list">
+        <p class="orders-count">
+            {{ orders|length }} order{% if orders|length != 1 %}s{% endif %} found
+        </p>
+
+
+        <div class="orders-list">
 
             {% for order in orders %}
 
-            <div class="tracking-order-card">
-
+            <div class="order-card">
 
                 <!-- ORDER HEADER -->
 
-                <div class="tracking-order-header">
+                <div class="order-top">
 
                     <div>
 
-                        <span class="tracking-label">
+                        <span class="order-id-label">
                             ORDER ID
                         </span>
 
-                        <h2>
+                        <h2 class="order-id">
                             {{ order["order_id"] }}
                         </h2>
 
@@ -103,606 +571,393 @@
                     </div>
 
 
-                    <div class="tracking-status
+                    {% if order["status"] == "Pending" %}
 
-                        {% if order["status"] == "Pending" %}
-                            pending
+                        <span class="status-badge status-pending">
+                            Pending
 
-                        {% elif order["status"] == "Processing" %}
-                            processing
+                        </span>
 
-                        {% elif order["status"] == "Shipped" %}
-                            shipped
+                    {% elif order["status"] == "Processing" %}
 
-                        {% elif order["status"] == "Delivered" %}
-                            delivered
+                        <span class="status-badge status-processing">
+                            Processing
 
-                        {% elif order["status"] == "Cancelled" %}
-                            cancelled
+                        </span>
 
-                        {% endif %}
+                    {% elif order["status"] == "Shipped" %}
 
-                    ">
+                        <span class="status-badge status-shipped">
+                            Shipped
 
-                        {{ order["status"] }}
+                        </span>
 
+                    {% elif order["status"] == "Delivered" %}
+
+                        <span class="status-badge status-delivered">
+                            Delivered
+
+                        </span>
+
+                    {% elif order["status"] == "Cancelled" %}
+
+                        <span class="status-badge status-cancelled">
+                            Cancelled
+
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+
+                <!-- DELIVERY -->
+
+                <div class="order-divider"></div>
+
+                <div class="order-delivery">
+
+                    <div>
+
+                        <span class="delivery-label">
+                            📅 Expected Delivery
+                        </span>
+
+                        <strong class="delivery-date">
+
+                            {% if order.get("delivery_date") %}
+
+                                {{ order["delivery_date"] }}
+
+                            {% else %}
+
+                                Within 10 days
+
+                            {% endif %}
+
+                        </strong>
+
+                    </div>
+
+                    <div class="delivery-icon">
+                        🚚
                     </div>
 
                 </div>
 
 
-                <div class="tracking-divider"></div>
+                <!-- ITEMS -->
 
+                <div class="order-divider"></div>
 
-                <!-- ORDER PROGRESS -->
+                <div class="order-items">
 
-                {% if order["status"] != "Cancelled" %}
-
-                <div class="tracking-section">
-
-                    <h3>
-                        Order Progress 🚚
-                    </h3>
-
-
-                    <div class="tracking-progress">
-
-
-                        <!-- PLACED -->
-
-                        <div class="tracking-step
-
-                            {% if order["status"] in [
-                                "Pending",
-                                "Processing",
-                                "Shipped",
-                                "Delivered"
-                            ] %}
-
-                                active
-
-                            {% endif %}
-
-                        ">
-
-                            <div class="tracking-circle">
-                                ✓
-                            </div>
-
-                            <span>
-                                Placed
-                            </span>
-
-                        </div>
-
-
-                        <!-- LINE -->
-
-                        <div class="tracking-line
-
-                            {% if order["status"] in [
-                                "Processing",
-                                "Shipped",
-                                "Delivered"
-                            ] %}
-
-                                active
-
-                            {% endif %}
-
-                        "></div>
-
-
-                        <!-- PROCESSING -->
-
-                        <div class="tracking-step
-
-                            {% if order["status"] in [
-                                "Processing",
-                                "Shipped",
-                                "Delivered"
-                            ] %}
-
-                                active
-
-                            {% endif %}
-
-                        ">
-
-                            <div class="tracking-circle">
-                                ✓
-                            </div>
-
-                            <span>
-                                Processing
-                            </span>
-
-                        </div>
-
-
-                        <!-- LINE -->
-
-                        <div class="tracking-line
-
-                            {% if order["status"] in [
-                                "Shipped",
-                                "Delivered"
-                            ] %}
-
-                                active
-
-                            {% endif %}
-
-                        "></div>
-
-
-                        <!-- SHIPPED -->
-
-                        <div class="tracking-step
-
-                            {% if order["status"] in [
-                                "Shipped",
-                                "Delivered"
-                            ] %}
-
-                                active
-
-                            {% endif %}
-
-                        ">
-
-                            <div class="tracking-circle">
-                                🚚
-                            </div>
-
-                            <span>
-                                Shipped
-                            </span>
-
-                        </div>
-
-
-                        <!-- LINE -->
-
-                        <div class="tracking-line
-
-                            {% if order["status"] == "Delivered" %}
-
-                                active
-
-                            {% endif %}
-
-                        "></div>
-
-
-                        <!-- DELIVERED -->
-
-                        <div class="tracking-step
-
-                            {% if order["status"] == "Delivered" %}
-
-                                active
-
-                            {% endif %}
-
-                        ">
-
-                            <div class="tracking-circle">
-                                ✓
-                            </div>
-
-                            <span>
-                                Delivered
-                            </span>
-
-                        </div>
-
-
-                    </div>
-
-                </div>
-
-
-                {% else %}
-
-
-                <!-- CANCELLED -->
-
-                <div class="cancelled-order-box">
-
-                    <div class="cancelled-icon">
-                        ❌
-                    </div>
-
-                    <h3>
-                        Order Cancelled
-                    </h3>
-
-                    <p>
-                        This order has been cancelled.
-                    </p>
-
-                </div>
-
-                {% endif %}
-
-
-                <div class="tracking-divider"></div>
-
-
-                <!-- DELIVERY INFORMATION -->
-
-                <div class="tracking-section">
-
-                    <h3>
-                        📅 Delivery Information
-                    </h3>
-
-
-                    <div class="delivery-tracking-box">
-
-                        {% if order.get("delivery_date") %}
-
-                            <div class="delivery-main">
-
-                                <span>
-                                    Expected Delivery Date
-                                </span>
-
-                                <strong>
-                                    {{ order["delivery_date"] }}
-                                </strong>
-
-                            </div>
-
-                        {% else %}
-
-                            <div class="delivery-main">
-
-                                <span>
-                                    Minimum Delivery Time
-                                </span>
-
-                                <strong>
-                                    10 Days
-                                </strong>
-
-                            </div>
-
-                        {% endif %}
-
-                    </div>
-
-                </div>
-
-
-                <div class="tracking-divider"></div>
-
-
-                <!-- ORDER ITEMS -->
-
-                <div class="tracking-section">
-
-                    <h3>
+                    <h3 class="order-section-title">
                         🛍️ Order Items
                     </h3>
 
 
-                    <div class="tracking-items">
+                    {% for item in order["items"] %}
 
-                        {% for item in order["items"] %}
+                    <div class="item-row">
 
-                        <div class="tracking-item">
+                        <div>
 
+                            <h4 class="item-name">
+                                {{ item["name"] }}
+                            </h4>
 
-                            <div class="tracking-item-info">
-
-                                <h4>
-                                    {{ item["name"] }}
-                                </h4>
-
-
-                                <p>
-                                    Quantity:
-                                    <strong>
-                                        {{ item["quantity"] }}
-                                    </strong>
-                                </p>
+                            <p class="item-meta">
+                                Quantity: <strong>{{ item["quantity"] }}</strong>
+                            </p>
 
 
-                                <!-- SPECIAL DETAILS -->
+                            {% if item.get("color") %}
 
-                                {% if item.get("message") %}
+                            <p class="item-meta">
+                                Color: <strong>{{ item["color"] }}</strong>
+                            </p>
 
-                                <div class="tracking-special-details">
-
-                                    <strong>
-                                        💐 Special Details
-                                    </strong>
-
-                                    <p>
-                                        {{ item["message"] }}
-                                    </p>
-
-                                </div>
-
-                                {% endif %}
+                            {% endif %}
 
 
-                                <!-- DEMAND FLOWER -->
+                            {% if item.get("size") %}
 
-                                {% if item.get("flower_name") %}
+                            <p class="item-meta">
+                                Size: <strong>{{ item["size"] }}</strong>
+                            </p>
 
-                                <p>
-
-                                    <strong>
-                                        🌺 Requested Flower:
-                                    </strong>
-
-                                    {{ item["flower_name"] }}
-
-                                </p>
-
-                                {% endif %}
+                            {% endif %}
 
 
-                                {% if item.get("demand_details") %}
+                            {% if item.get("message") %}
 
-                                <p>
-
-                                    <strong>
-                                        ✨ Customer Demand:
-                                    </strong>
-
-                                    {{ item["demand_details"] }}
-
-                                </p>
-
-                                {% endif %}
-
-                            </div>
-
-
-                            <!-- ITEM PRICE -->
-
-                            <div class="tracking-item-price">
-
-                                <span>
-                                    ₹{{ item["price"] }}
-                                    ×
-                                    {{ item["quantity"] }}
-                                </span>
+                            <div class="special-details">
 
                                 <strong>
-                                    ₹{{ item["price"] * item["quantity"] }}
+                                    💐 Special Details
                                 </strong>
+
+                                <br>
+
+                                {{ item["message"] }}
 
                             </div>
 
+                            {% endif %}
+
+
+                            {% if item.get("flower_name") %}
+
+                            <p class="item-meta">
+
+                                🌺 <strong>Requested Flower:</strong>
+                                {{ item["flower_name"] }}
+
+                            </p>
+
+                            {% endif %}
+
+
+                            {% if item.get("demand_details") %}
+
+                            <p class="item-meta">
+
+                                ✨ <strong>Demand:</strong>
+                                {{ item["demand_details"] }}
+
+                            </p>
+
+                            {% endif %}
 
                         </div>
 
-                        {% endfor %}
+
+                        <div class="item-price">
+
+                            <span>
+                                ₹{{ item["price"] }} × {{ item["quantity"] }}
+                            </span>
+
+                            <strong>
+                                ₹{{ item["price"] * item["quantity"] }}
+                            </strong>
+
+                        </div>
 
                     </div>
+
+                    {% endfor %}
 
                 </div>
 
 
-                <div class="tracking-divider"></div>
+                <!-- PAYMENT -->
 
+                <div class="order-divider"></div>
 
-                <!-- PAYMENT SUMMARY -->
+                <div class="payment-summary">
 
-                <div class="tracking-section">
-
-                    <h3>
+                    <h3 class="order-section-title">
                         💰 Payment Summary
                     </h3>
 
 
-                    <div class="tracking-payment">
+                    <div class="summary-row">
+
+                        <span>
+                            Products Total
+                        </span>
+
+                        <strong>
+                            ₹{{ order["product_total"] }}
+                        </strong>
+
+                    </div>
 
 
-                        <div>
+                    {% if order.get("discount", 0) > 0 %}
 
-                            <span>
-                                Products Total
-                            </span>
+                    <div class="summary-row">
 
-                            <strong>
-                                ₹{{ order["product_total"] }}
-                            </strong>
+                        <span>
+                            Coupon Discount
+                        </span>
 
-                        </div>
+                        <strong>
+                            -₹{{ order["discount"] }}
+                        </strong>
 
+                    </div>
 
-                        <div>
-
-                            <span>
-                                Delivery Charge
-                            </span>
-
-                            <strong>
-                                ₹{{ order["delivery_charge"] }}
-                            </strong>
-
-                        </div>
+                    {% endif %}
 
 
-                        <div class="tracking-final-total">
+                    <div class="summary-row">
 
-                            <span>
-                                Total Amount
-                            </span>
+                        <span>
+                            Delivery Charge
+                        </span>
 
-                            <strong>
-                                ₹{{ order["final_total"] }}
-                            </strong>
+                        <strong>
+                            ₹{{ order["delivery_charge"] }}
+                        </strong>
 
-                        </div>
+                    </div>
 
+
+                    <div class="summary-row summary-total">
+
+                        <span>
+                            Total Amount
+                        </span>
+
+                        <strong>
+                            ₹{{ order["final_total"] }}
+                        </strong>
 
                     </div>
 
                 </div>
 
 
-                <div class="tracking-divider"></div>
+                <!-- ORDER ACTIONS -->
+
+                <div class="order-actions">
+
+                    <a
+                        href="/track_order"
+                        class="track-button"
+                    >
+                        📍 Track Order
+                    </a>
 
 
-                <!-- CANCELLATION -->
-
-                {% if order["status"] in [
-                    "Pending",
-                    "Processing"
-                ] %}
+                    {% if order["status"] in [
+                        "Pending",
+                        "Processing"
+                    ] %}
 
 
-                    {% set has_custom = false %}
-                    {% set has_demand = false %}
+                        {% set has_custom = false %}
+                        {% set has_demand = false %}
 
 
-                    {% for item in order["items"] %}
+                        {% for item in order["items"] %}
+
+                            {% if item["id"][:7] == "custom_" %}
+                                {% set has_custom = true %}
+                            {% endif %}
+
+                            {% if item["id"][:7] == "demand_" %}
+                                {% set has_demand = true %}
+                            {% endif %}
+
+                        {% endfor %}
 
 
-                        {% if item["id"][:7] == "custom_" %}
-
-                            {% set has_custom = true %}
-
-                        {% endif %}
-
-
-                        {% if item["id"][:7] == "demand_" %}
-
-                            {% set has_demand = true %}
-
-                        {% endif %}
-
-
-                    {% endfor %}
-
-
-                    {% if not has_custom and not has_demand %}
-
-
-                    <!-- NORMAL ORDER CAN CANCEL -->
-
-                    <div class="tracking-cancel-section">
-
-                        <h3>
-                            Cancel Order
-                        </h3>
-
-                        <p>
-                            You can cancel this order while it is
-                            Pending or Processing.
-                        </p>
-
+                        {% if not has_custom and not has_demand %}
 
                         <form
                             action="/cancel_order/{{ order['order_id'] }}"
                             method="POST"
+                            style="margin:0; flex:1; min-width:180px;"
                             onsubmit="return confirm('Are you sure you want to cancel this order?');"
                         >
 
                             <input
                                 type="hidden"
                                 name="mobile"
-                                value="{{ order['mobile'] }}"
+                                value="{{ mobile }}"
                             >
-
 
                             <button
                                 type="submit"
-                                class="cancel-order-button"
+                                class="cancel-button"
+                                style="width:100%;"
                             >
                                 Cancel Order ❌
                             </button>
 
                         </form>
 
+                        {% endif %}
+
+                    {% endif %}
+
+                </div>
+
+
+                <!-- SPECIAL INFORMATION -->
+
+                {% if order["status"] in [
+                    "Pending",
+                    "Processing"
+                ] %}
+
+                    {% set has_custom = false %}
+                    {% set has_demand = false %}
+
+                    {% for item in order["items"] %}
+
+                        {% if item["id"][:7] == "custom_" %}
+                            {% set has_custom = true %}
+                        {% endif %}
+
+                        {% if item["id"][:7] == "demand_" %}
+                            {% set has_demand = true %}
+                        {% endif %}
+
+                    {% endfor %}
+
+
+                    {% if has_custom or has_demand %}
+
+                    <div class="info-note">
+
+                        ℹ️ <strong>Cancellation Not Available</strong><br>
+
+                        Custom and Flower As Per Demand orders
+                        cannot be cancelled after placing the order.
+
                     </div>
-
-
-                    {% else %}
-
-
-                    <!-- CUSTOM / DEMAND CANNOT CANCEL -->
-
-                    <div class="tracking-note">
-
-                        <strong>
-                            ℹ️ Cancellation Not Available
-                        </strong>
-
-                        <p>
-                            Custom and Flower As Per Demand orders
-                            cannot be cancelled after placing the order.
-                        </p>
-
-                    </div>
-
 
                     {% endif %}
 
 
                 {% elif order["status"] == "Shipped" %}
 
+                <div class="info-note">
 
-                <!-- SHIPPED -->
+                    🚚 <strong>Order Has Been Shipped</strong><br>
 
-                <div class="tracking-note">
-
-                    <strong>
-                        🚚 Order Has Been Shipped
-                    </strong>
-
-                    <p>
-                        This order cannot be cancelled after shipping.
-                    </p>
+                    This order cannot be cancelled after shipping.
 
                 </div>
 
 
                 {% elif order["status"] == "Delivered" %}
 
+                <div class="info-note">
 
-                <!-- DELIVERED -->
+                    ✅ <strong>Order Delivered</strong><br>
 
-                <div class="tracking-note">
-
-                    <strong>
-                        ✅ Order Delivered
-                    </strong>
-
-                    <p>
-                        This order has already been delivered.
-                    </p>
+                    This order has already been delivered.
 
                 </div>
 
 
                 {% elif order["status"] == "Cancelled" %}
 
+                <div class="info-note cancelled-note">
 
-                <!-- ALREADY CANCELLED -->
+                    ❌ <strong>Order Cancelled</strong><br>
 
-                <div class="tracking-note">
-
-                    <strong>
-                        ❌ Order Cancelled
-                    </strong>
-
-                    <p>
-                        This order has already been cancelled.
-                    </p>
+                    This order has already been cancelled.
 
                 </div>
 
-
                 {% endif %}
-
 
             </div>
 
@@ -713,12 +968,11 @@
 
     {% elif not error %}
 
-
         <!-- NO ORDERS -->
 
-        <div class="card no-orders">
+        <div class="no-orders">
 
-            <div>
+            <div class="no-orders-icon">
                 🛒
             </div>
 
@@ -727,15 +981,12 @@
             </h2>
 
             <p>
-                Enter your mobile number above
-                to view your orders.
+                You have not placed any orders yet.
             </p>
 
         </div>
 
-
     {% endif %}
-
 
 </div>
 

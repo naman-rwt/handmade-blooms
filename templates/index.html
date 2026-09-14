@@ -3,38 +3,223 @@
 {% block content %}
 
 <style>
-/* PRODUCT SEARCH + SORT */
+
+/* =========================================
+   HOME PAGE
+   ========================================= */
+
+.home-page {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+
+/* =========================================
+   HERO
+   ========================================= */
+
+.hero {
+    margin: 0;
+    padding: 65px 20px 70px;
+    text-align: center;
+    background:
+        radial-gradient(circle at top left, rgba(255,255,255,.75), transparent 35%),
+        linear-gradient(135deg, #fff0f5, #ffe1ec);
+    border-radius: 0 0 30px 30px;
+    box-sizing: border-box;
+}
+
+.hero-badge {
+    display: inline-block;
+    padding: 8px 16px;
+    margin-bottom: 15px;
+    border-radius: 30px;
+    background: rgba(255,255,255,.8);
+    color: #e84f88;
+    font-size: 13px;
+    font-weight: bold;
+    box-shadow: 0 5px 18px rgba(255,105,150,.08);
+}
+
+.hero h1 {
+    margin: 0;
+    color: #333;
+    font-size: 42px;
+    line-height: 1.2;
+}
+
+.hero p {
+    max-width: 650px;
+    margin: 14px auto 0;
+    color: #666;
+    font-size: 17px;
+    line-height: 1.6;
+}
+
+
+/* =========================================
+   TRUST STRIP
+   ========================================= */
+
+.home-benefits {
+    max-width: 1000px;
+    margin: -25px auto 35px;
+    padding: 0 20px;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.home-benefits-inner {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+}
+
+.benefit-item {
+    background: white;
+    border-radius: 16px;
+    padding: 17px 14px;
+    text-align: center;
+    box-shadow: 0 7px 25px rgba(0,0,0,.07);
+    border: 1px solid #ffe0ea;
+}
+
+.benefit-icon {
+    font-size: 24px;
+    margin-bottom: 5px;
+}
+
+.benefit-title {
+    color: #444;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.benefit-text {
+    color: #888;
+    font-size: 12px;
+    margin-top: 3px;
+}
+
+
+/* =========================================
+   CUSTOM OPTIONS
+   ========================================= */
+
+.custom-bouquet-option {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto 45px;
+    padding: 0 20px;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.custom-card {
+    margin: 0;
+    padding: 30px 25px;
+    text-align: center;
+    border-radius: 22px;
+    background: white;
+    border: 1px solid #ffdce8;
+    box-shadow: 0 8px 28px rgba(0,0,0,.06);
+    transition: transform .2s ease, box-shadow .2s ease;
+    box-sizing: border-box;
+}
+
+.custom-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 13px 32px rgba(0,0,0,.09);
+}
+
+.custom-icon {
+    width: 65px;
+    height: 65px;
+    margin: 0 auto 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff1f6;
+    border-radius: 50%;
+    font-size: 32px;
+}
+
+.custom-card h2 {
+    margin: 0;
+    color: #333;
+    font-size: 22px;
+}
+
+.custom-card p {
+    max-width: 450px;
+    margin: 10px auto 20px;
+    color: #777;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.custom-card button {
+    border: none;
+    border-radius: 25px;
+    padding: 12px 22px;
+    background: #ff6fa5;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background .2s ease, transform .2s ease;
+}
+
+.custom-card button:hover {
+    background: #f45791;
+    transform: translateY(-1px);
+}
+
+
+/* =========================================
+   PRODUCTS SECTION
+   ========================================= */
 
 .products-section {
     width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px 45px;
+    box-sizing: border-box;
 }
 
 .products-heading {
     text-align: center;
-    margin: 35px 0 20px;
+    margin: 10px 0 22px;
 }
 
 .products-heading h2 {
     margin: 0;
-    font-size: 32px;
     color: #333;
+    font-size: 32px;
 }
 
 .products-heading p {
-    margin-top: 8px;
+    margin: 8px 0 0;
     color: #777;
     font-size: 15px;
 }
 
+
+/* =========================================
+   SEARCH + SORT
+   ========================================= */
+
 .product-tools {
     width: 100%;
-    max-width: 700px;
+    max-width: 760px;
     margin: 0 auto 30px;
-    padding: 0 20px;
-    box-sizing: border-box;
     display: flex;
     gap: 12px;
     align-items: center;
+    box-sizing: border-box;
 }
 
 .product-search {
@@ -48,10 +233,10 @@
     border: 2px solid #ffd0df;
     border-radius: 30px;
     outline: none;
-    font-size: 16px;
+    font-size: 15px;
     background: white;
     color: #333;
-    box-shadow: 0 5px 18px rgba(255, 105, 150, 0.08);
+    box-shadow: 0 5px 18px rgba(255,105,150,.07);
 }
 
 .product-search input:focus {
@@ -59,15 +244,202 @@
 }
 
 .product-sort select {
+    min-width: 190px;
     padding: 14px 16px;
     border: 2px solid #ffd0df;
     border-radius: 30px;
     outline: none;
-    font-size: 15px;
+    font-size: 14px;
     background: white;
     color: #444;
     cursor: pointer;
 }
+
+
+/* =========================================
+   PRODUCT GRID
+   ========================================= */
+
+.products {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 22px;
+}
+
+.product-card {
+    margin: 0;
+    padding: 15px;
+    border-radius: 20px;
+    background: white;
+    border: 1px solid #f4dce5;
+    box-shadow: 0 7px 25px rgba(0,0,0,.055);
+    text-align: center;
+    box-sizing: border-box;
+    overflow: hidden;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 14px 32px rgba(0,0,0,.09);
+}
+
+.product-image-wrap {
+    width: 100%;
+    height: 220px;
+    border-radius: 15px;
+    overflow: hidden;
+    background: #fff7f9;
+}
+
+.product-image-wrap img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    transition: transform .25s ease;
+}
+
+.product-card:hover .product-image-wrap img {
+    transform: scale(1.04);
+}
+
+.product-card h2 {
+    margin: 15px 5px 5px;
+    color: #333;
+    font-size: 19px;
+}
+
+.product-price {
+    margin: 0;
+    color: #e84f88;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+
+/* =========================================
+   RATING
+   ========================================= */
+
+.home-product-rating {
+    min-height: 25px;
+    margin: 8px 0 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.home-rating-stars {
+    color: #ffb400;
+    font-size: 17px;
+    letter-spacing: 1px;
+}
+
+.home-rating-number {
+    color: #555;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.home-rating-count {
+    color: #888;
+    font-size: 11px;
+}
+
+.home-no-rating {
+    color: #aaa;
+    font-size: 12px;
+}
+
+
+/* =========================================
+   QUANTITY
+   ========================================= */
+
+.quantity-box {
+    width: fit-content;
+    margin: 10px auto 12px;
+    display: flex;
+    align-items: center;
+    border: 1px solid #ffd1df;
+    border-radius: 25px;
+    overflow: hidden;
+    background: #fff9fb;
+}
+
+.quantity-box button {
+    width: 36px;
+    height: 34px;
+    border: none;
+    background: transparent;
+    color: #e84f88;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.quantity-box button:hover {
+    background: #ffe8f0;
+}
+
+.quantity-box span {
+    min-width: 30px;
+    text-align: center;
+    color: #444;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+
+/* =========================================
+   PRODUCT ACTIONS
+   ========================================= */
+
+.product-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.add-cart-button,
+.details-button {
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 25px;
+    padding: 11px 12px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.add-cart-button {
+    border: none;
+    background: #ff6fa5;
+    color: white;
+}
+
+.add-cart-button:hover {
+    background: #f45791;
+}
+
+.details-button {
+    display: block;
+    text-decoration: none;
+    border: 1px solid #ffc5d8;
+    background: #fff;
+    color: #e84f88;
+}
+
+.details-button:hover {
+    background: #fff1f6;
+}
+
+
+/* =========================================
+   NO PRODUCTS
+   ========================================= */
 
 .no-products {
     width: 100%;
@@ -94,65 +466,71 @@
 
 
 /* =========================================
-   PRODUCT RATING ON HOMEPAGE
-   ========================================= */
-
-.home-product-rating {
-    min-height: 24px;
-    margin: 5px 0 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 6px;
-}
-
-.home-rating-stars {
-    color: #ffb400;
-    font-size: 18px;
-    letter-spacing: 1px;
-}
-
-.home-rating-number {
-    color: #555;
-    font-size: 13px;
-    font-weight: bold;
-}
-
-.home-rating-count {
-    color: #888;
-    font-size: 12px;
-}
-
-.home-no-rating {
-    color: #aaa;
-    font-size: 12px;
-}
-
-
-/* =========================================
    MOBILE
    ========================================= */
 
-@media (max-width: 700px) {
+@media (max-width: 1000px) {
 
-    .products-heading {
-        margin-top: 25px;
+    .products {
+        grid-template-columns: repeat(3, 1fr);
     }
 
-    .products-heading h2 {
-        font-size: 26px;
+}
+
+@media (max-width: 750px) {
+
+    .hero {
+        padding: 45px 18px 55px;
+    }
+
+    .hero h1 {
+        font-size: 34px;
+    }
+
+    .hero p {
+        font-size: 15px;
+    }
+
+    .home-benefits-inner {
+        grid-template-columns: 1fr;
+    }
+
+    .custom-bouquet-option {
+        grid-template-columns: 1fr;
+        padding: 0 15px;
+    }
+
+    .products-section {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    .products {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+    }
+
+    .product-image-wrap {
+        height: 190px;
+    }
+
+    .product-card {
+        padding: 11px;
+    }
+
+    .product-card h2 {
+        font-size: 17px;
+    }
+
+    .product-price {
+        font-size: 16px;
     }
 
     .product-tools {
         flex-direction: column;
-        padding: 0 15px;
     }
 
-    .product-search {
-        width: 100%;
-    }
-
+    .product-search,
     .product-sort {
         width: 100%;
     }
@@ -161,301 +539,472 @@
         width: 100%;
     }
 
-    .product-search input {
-        padding: 13px 17px;
+}
+
+@media (max-width: 430px) {
+
+    .hero h1 {
+        font-size: 29px;
+    }
+
+    .products {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .product-image-wrap {
+        height: 155px;
+    }
+
+    .product-card {
+        padding: 9px;
+        border-radius: 16px;
+    }
+
+    .product-card h2 {
+        margin-top: 10px;
         font-size: 15px;
     }
+
+    .home-rating-stars {
+        font-size: 14px;
+    }
+
+    .home-rating-number,
+    .home-rating-count {
+        font-size: 10px;
+    }
+
+    .quantity-box button {
+        width: 31px;
+        height: 31px;
+    }
+
+    .quantity-box span {
+        min-width: 25px;
+    }
+
+    .add-cart-button,
+    .details-button {
+        padding: 9px 7px;
+        font-size: 11px;
+    }
+
 }
+
 </style>
 
 
-<section class="hero">
-
-    <h1>
-        Handmade Blooms
-    </h1>
-
-    <p>
-        Beautiful Handmade Flower Bouquets
-        Crafted With Love 🌷
-    </p>
-
-</section>
+<div class="home-page">
 
 
-<!-- CUSTOM OPTIONS -->
+    <!-- =====================================
+         HERO
+         ===================================== -->
 
-<section class="custom-bouquet-option">
+    <section class="hero">
 
-    <div class="card custom-card">
-
-        <div class="custom-icon">
-            💐
+        <div class="hero-badge">
+            🌸 Handmade with Love
         </div>
 
-        <h2>
-            Create Your Custom Bouquet
-        </h2>
+        <h1>
+            Handmade Blooms
+        </h1>
 
         <p>
-            Choose your bouquet size,
-            add extra flowers and write
-            your special message.
+            Beautiful handmade flower bouquets,
+            crafted with care to make every moment special. 💐
         </p>
-
-        <a href="/custom_bouquet">
-
-            <button type="button">
-                Create Custom Bouquet 💐
-            </button>
-
-        </a>
-
-    </div>
-
-
-    <div class="card custom-card">
-
-        <div class="custom-icon">
-            🌺
-        </div>
-
-        <h2>
-            Flower As Per Demand
-        </h2>
-
-        <p>
-            Don't see your favourite flower?
-            Tell us the flower name and
-            your own design or requirement.
-        </p>
-
-        <a href="/flower_demand">
-
-            <button type="button">
-                Give Your Demand 🌺
-            </button>
-
-        </a>
-
-    </div>
-
-</section>
-
-
-<!-- NORMAL PRODUCTS -->
-
-<section class="products-section">
-
-    <div class="products-heading">
-
-        <h2>
-            Our Flowers 🌸
-        </h2>
-
-        <p>
-            Choose your favourite flowers
-        </p>
-
-    </div>
-
-
-    <!-- SEARCH + SORT -->
-
-    <div class="product-tools">
-
-        <div class="product-search">
-
-            <input
-                type="text"
-                id="productSearch"
-                placeholder="Search flowers... 🔍"
-                onkeyup="searchProducts()"
-            >
-
-        </div>
-
-
-        <div class="product-sort">
-
-            <select
-                id="sortProducts"
-                onchange="sortProducts()"
-            >
-
-                <option value="default">
-                    Sort By
-                </option>
-
-                <option value="price-low">
-                    Price: Low to High
-                </option>
-
-                <option value="price-high">
-                    Price: High to Low
-                </option>
-
-                <option value="name">
-                    Name: A to Z
-                </option>
-
-            </select>
-
-        </div>
-
-    </div>
-
-
-    <section
-        class="products"
-        id="productsContainer"
-    >
-
-        {% for product in products %}
-
-        <div
-            class="card product-card"
-            data-product-name="{{ product.name | lower }}"
-            data-product-price="{{ product.price }}"
-        >
-
-            <a href="/product/{{ product.id }}">
-
-                <img
-                    src="{{ url_for(
-                        'static',
-                        filename='images/' + product.image
-                    ) }}"
-                    alt="{{ product.name }}"
-                >
-
-            </a>
-
-
-            <h2>
-                {{ product.name }}
-            </h2>
-
-
-            <p>
-                ₹{{ product.price }}
-            </p>
-
-
-            <!-- PRODUCT RATING -->
-
-            {% set rating = product_ratings.get(product.id, {}) %}
-
-            <div class="home-product-rating">
-
-                {% if rating.get("count", 0) > 0 %}
-
-                    <span class="home-rating-stars">
-
-                        {% for i in range(1, 6) %}
-
-                            {% if i <= rating.get("average", 0) %}
-                                ★
-                            {% else %}
-                                ☆
-                            {% endif %}
-
-                        {% endfor %}
-
-                    </span>
-
-                    <span class="home-rating-number">
-                        {{ rating.get("average", 0) }}/5
-                    </span>
-
-                    <span class="home-rating-count">
-                        ({{ rating.get("count", 0) }} reviews)
-                    </span>
-
-                {% else %}
-
-                    <span class="home-no-rating">
-                        No ratings yet
-                    </span>
-
-                {% endif %}
-
-            </div>
-
-
-            <div class="quantity-box">
-
-                <button
-                    type="button"
-                    onclick="decreaseQuantity(
-                        '{{ product.id }}'
-                    )"
-                >
-                    −
-                </button>
-
-
-                <span
-                    id="quantity-{{ product.id }}"
-                >
-                    1
-                </span>
-
-
-                <button
-                    type="button"
-                    onclick="increaseQuantity(
-                        '{{ product.id }}'
-                    )"
-                >
-                    +
-                </button>
-
-            </div>
-
-
-            <a
-                id="add-link-{{ product.id }}"
-                href="/add_to_cart/{{ product.id }}?quantity=1"
-            >
-
-                <button type="button">
-                    Add To Cart 🛒
-                </button>
-
-            </a>
-
-        </div>
-
-        {% endfor %}
 
     </section>
 
 
-    <div
-        class="no-products"
-        id="noProducts"
-        style="display: none;"
-    >
+    <!-- =====================================
+         BENEFITS
+         ===================================== -->
 
-        <div class="no-products-icon">
-            🌸
+    <section class="home-benefits">
+
+        <div class="home-benefits-inner">
+
+            <div class="benefit-item">
+
+                <div class="benefit-icon">
+                    🌷
+                </div>
+
+                <div class="benefit-title">
+                    Handmade Flowers
+                </div>
+
+                <div class="benefit-text">
+                    Carefully crafted with love
+                </div>
+
+            </div>
+
+
+            <div class="benefit-item">
+
+                <div class="benefit-icon">
+                    🎁
+                </div>
+
+                <div class="benefit-title">
+                    Perfect for Gifting
+                </div>
+
+                <div class="benefit-text">
+                    Make someone feel special
+                </div>
+
+            </div>
+
+
+            <div class="benefit-item">
+
+                <div class="benefit-icon">
+                    🚚
+                </div>
+
+                <div class="benefit-title">
+                    Delivery Available
+                </div>
+
+                <div class="benefit-text">
+                    Within 10 days
+                </div>
+
+            </div>
+
         </div>
 
-        <h3>
-            No Flowers Found
-        </h3>
+    </section>
 
-        <p>
-            Try searching for another flower.
-        </p>
 
-    </div>
+    <!-- =====================================
+         CUSTOM OPTIONS
+         ===================================== -->
 
-</section>
+    <section class="custom-bouquet-option">
+
+
+        <div class="card custom-card">
+
+            <div class="custom-icon">
+                💐
+            </div>
+
+            <h2>
+                Create Your Custom Bouquet
+            </h2>
+
+            <p>
+                Choose your bouquet size,
+                add extra flowers and write
+                your special message.
+            </p>
+
+            <a href="/custom_bouquet">
+
+                <button type="button">
+                    Create Custom Bouquet 💐
+                </button>
+
+            </a>
+
+        </div>
+
+
+        <div class="card custom-card">
+
+            <div class="custom-icon">
+                🌺
+            </div>
+
+            <h2>
+                Flower As Per Demand
+            </h2>
+
+            <p>
+                Don't see your favourite flower?
+                Tell us the flower name and
+                your own design or requirement.
+            </p>
+
+            <a href="/flower_demand">
+
+                <button type="button">
+                    Give Your Demand 🌺
+                </button>
+
+            </a>
+
+        </div>
+
+
+    </section>
+
+
+    <!-- =====================================
+         PRODUCTS
+         ===================================== -->
+
+    <section class="products-section">
+
+
+        <div class="products-heading">
+
+            <h2>
+                Our Flowers 🌸
+            </h2>
+
+            <p>
+                Choose your favourite handmade flowers
+            </p>
+
+        </div>
+
+
+        <!-- SEARCH + SORT -->
+
+        <div class="product-tools">
+
+            <div class="product-search">
+
+                <input
+                    type="text"
+                    id="productSearch"
+                    placeholder="Search flowers... 🔍"
+                    autocomplete="off"
+                    onkeyup="searchProducts()"
+                >
+
+            </div>
+
+
+            <div class="product-sort">
+
+                <select
+                    id="sortProducts"
+                    onchange="sortProducts()"
+                >
+
+                    <option value="default">
+                        Sort By
+                    </option>
+
+                    <option value="price-low">
+                        Price: Low to High
+                    </option>
+
+                    <option value="price-high">
+                        Price: High to Low
+                    </option>
+
+                    <option value="name">
+                        Name: A to Z
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+
+        <!-- PRODUCT GRID -->
+
+        <section
+            class="products"
+            id="productsContainer"
+        >
+
+            {% for product in products %}
+
+            <div
+                class="card product-card"
+                data-product-name="{{ product.name | lower }}"
+                data-product-price="{{ product.price }}"
+                data-original-index="{{ loop.index0 }}"
+            >
+
+
+                <!-- IMAGE -->
+
+                <a href="/product/{{ product.id }}">
+
+                    <div class="product-image-wrap">
+
+                        <img
+                            src="{{ url_for(
+                                'static',
+                                filename='images/' + product.image
+                            ) }}"
+                            alt="{{ product.name }}"
+                            loading="lazy"
+                        >
+
+                    </div>
+
+                </a>
+
+
+                <!-- NAME -->
+
+                <h2>
+                    {{ product.name }}
+                </h2>
+
+
+                <!-- PRICE -->
+
+                <p class="product-price">
+                    ₹{{ product.price }}
+                </p>
+
+
+                <!-- RATING -->
+
+                {% set rating = product_ratings.get(product.id, {}) %}
+
+                <div class="home-product-rating">
+
+                    {% if rating.get("count", 0) > 0 %}
+
+                        <span class="home-rating-stars">
+
+                            {% for i in range(1, 6) %}
+
+                                {% if i <= rating.get("average", 0) %}
+                                    ★
+                                {% else %}
+                                    ☆
+                                {% endif %}
+
+                            {% endfor %}
+
+                        </span>
+
+                        <span class="home-rating-number">
+                            {{ rating.get("average", 0) }}/5
+                        </span>
+
+                        <span class="home-rating-count">
+                            ({{ rating.get("count", 0) }} reviews)
+                        </span>
+
+                    {% else %}
+
+                        <span class="home-no-rating">
+                            No ratings yet
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+
+                <!-- QUANTITY -->
+
+                <div class="quantity-box">
+
+                    <button
+                        type="button"
+                        onclick="decreaseQuantity('{{ product.id }}')"
+                        aria-label="Decrease quantity"
+                    >
+                        −
+                    </button>
+
+
+                    <span id="quantity-{{ product.id }}">
+                        1
+                    </span>
+
+
+                    <button
+                        type="button"
+                        onclick="increaseQuantity('{{ product.id }}')"
+                        aria-label="Increase quantity"
+                    >
+                        +
+                    </button>
+
+                </div>
+
+
+                <!-- ACTIONS -->
+
+                <div class="product-actions">
+
+                    <a
+                        id="add-link-{{ product.id }}"
+                        href="/add_to_cart/{{ product.id }}?quantity=1"
+                    >
+
+                        <button
+                            type="button"
+                            class="add-cart-button"
+                        >
+                            Add To Cart 🛒
+                        </button>
+
+                    </a>
+
+
+                    <a
+                        class="details-button"
+                        href="/product/{{ product.id }}"
+                    >
+                        View Details
+                    </a>
+
+                </div>
+
+
+            </div>
+
+            {% endfor %}
+
+        </section>
+
+
+        <!-- NO PRODUCTS -->
+
+        <div
+            class="no-products"
+            id="noProducts"
+            style="display: none;"
+        >
+
+            <div class="no-products-icon">
+                🌸
+            </div>
+
+            <h3>
+                No Flowers Found
+            </h3>
+
+            <p>
+                Try searching for another flower.
+            </p>
+
+        </div>
+
+
+    </section>
+
+
+</div>
 
 
 <script>
+
+/* =========================================
+   QUANTITY
+   ========================================= */
 
 function increaseQuantity(productId) {
 
@@ -464,10 +1013,19 @@ function increaseQuantity(productId) {
             "quantity-" + productId
         );
 
+    if (!quantityElement) {
+        return;
+    }
+
     let quantity =
         parseInt(
-            quantityElement.innerText
+            quantityElement.innerText,
+            10
         );
+
+    if (isNaN(quantity)) {
+        quantity = 1;
+    }
 
     if (quantity < 99) {
 
@@ -491,10 +1049,19 @@ function decreaseQuantity(productId) {
             "quantity-" + productId
         );
 
+    if (!quantityElement) {
+        return;
+    }
+
     let quantity =
         parseInt(
-            quantityElement.innerText
+            quantityElement.innerText,
+            10
         );
+
+    if (isNaN(quantity)) {
+        quantity = 1;
+    }
 
     if (quantity > 1) {
 
@@ -521,6 +1088,10 @@ function updateAddLink(
             "add-link-" + productId
         );
 
+    if (!addLink) {
+        return;
+    }
+
     addLink.href =
         "/add_to_cart/" +
         productId +
@@ -528,6 +1099,10 @@ function updateAddLink(
         quantity;
 }
 
+
+/* =========================================
+   SEARCH
+   ========================================= */
 
 function searchProducts() {
 
@@ -556,7 +1131,7 @@ function searchProducts() {
         let productName =
             card.getAttribute(
                 "data-product-name"
-            );
+            ) || "";
 
 
         if (
@@ -596,8 +1171,13 @@ function searchProducts() {
             "none";
 
     }
+
 }
 
+
+/* =========================================
+   SORT
+   ========================================= */
 
 function sortProducts() {
 
@@ -629,13 +1209,15 @@ function sortProducts() {
                 parseInt(
                     a.getAttribute(
                         "data-product-price"
-                    )
+                    ),
+                    10
                 )
                 -
                 parseInt(
                     b.getAttribute(
                         "data-product-price"
-                    )
+                    ),
+                    10
                 )
             );
 
@@ -652,13 +1234,15 @@ function sortProducts() {
                 parseInt(
                     b.getAttribute(
                         "data-product-price"
-                    )
+                    ),
+                    10
                 )
                 -
                 parseInt(
                     a.getAttribute(
                         "data-product-price"
-                    )
+                    ),
+                    10
                 )
             );
 
@@ -674,16 +1258,43 @@ function sortProducts() {
             let nameA =
                 a.getAttribute(
                     "data-product-name"
-                );
+                ) || "";
 
             let nameB =
                 b.getAttribute(
                     "data-product-name"
-                );
+                ) || "";
 
 
             return nameA.localeCompare(
                 nameB
+            );
+
+        });
+
+    }
+
+
+    else {
+
+        /* Restore original product order */
+
+        cards.sort(function(a, b) {
+
+            return (
+                parseInt(
+                    a.getAttribute(
+                        "data-original-index"
+                    ),
+                    10
+                )
+                -
+                parseInt(
+                    b.getAttribute(
+                        "data-original-index"
+                    ),
+                    10
+                )
             );
 
         });
@@ -699,6 +1310,7 @@ function sortProducts() {
 
 
     searchProducts();
+
 }
 
 </script>

@@ -1,0 +1,418 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+
+/* ============================= */
+/* ABOUT PAGE */
+/* ============================= */
+
+.about-page {
+    max-width: 1000px;
+    margin: 35px auto 50px;
+    padding: 20px;
+}
+
+.about-card {
+    background: white;
+    border-radius: 25px;
+    padding: 45px 40px;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+    border: 1px solid #f4dce5;
+}
+
+
+/* ============================= */
+/* HEADER */
+/* ============================= */
+
+.about-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.about-icon {
+    width: 95px;
+    height: 95px;
+    margin: 0 auto 18px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #fff0f5;
+    border-radius: 50%;
+
+    font-size: 55px;
+
+    box-shadow:
+        0 5px 18px rgba(255, 105, 160, 0.15);
+}
+
+.about-header h1 {
+    margin: 0;
+    color: #333;
+    font-size: 32px;
+}
+
+.about-header p {
+    color: #888;
+    margin-top: 12px;
+    font-size: 16px;
+}
+
+
+/* ============================= */
+/* INTRO */
+/* ============================= */
+
+.about-intro {
+    text-align: center;
+    max-width: 750px;
+    margin: 0 auto 40px;
+}
+
+.about-intro p {
+    color: #666;
+    line-height: 1.8;
+    font-size: 16px;
+    margin: 0;
+}
+
+
+/* ============================= */
+/* FEATURE BOXES */
+/* ============================= */
+
+.about-features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin: 35px 0;
+}
+
+.about-feature {
+    background: #fff7f9;
+    border: 1px solid #f5dce5;
+    border-radius: 18px;
+    padding: 25px 18px;
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+.about-feature:hover {
+    transform: translateY(-4px);
+}
+
+.about-feature-icon {
+    font-size: 38px;
+    margin-bottom: 10px;
+}
+
+.about-feature h3 {
+    margin: 5px 0 8px;
+    color: #e84f88;
+    font-size: 18px;
+}
+
+.about-feature p {
+    margin: 0;
+    color: #666;
+    line-height: 1.5;
+    font-size: 14px;
+}
+
+
+/* ============================= */
+/* SECTIONS */
+/* ============================= */
+
+.about-section {
+    margin-top: 35px;
+    padding-top: 5px;
+}
+
+.about-section h2 {
+    color: #e84f88;
+    margin-bottom: 12px;
+    font-size: 23px;
+}
+
+.about-section p {
+    color: #666;
+    line-height: 1.8;
+    margin: 0;
+    font-size: 15px;
+}
+
+
+/* ============================= */
+/* HIGHLIGHT */
+/* ============================= */
+
+.about-highlight {
+    margin-top: 40px;
+    padding: 28px 20px;
+
+    background: linear-gradient(
+        135deg,
+        #fff0f5,
+        #fff8fa
+    );
+
+    border-radius: 20px;
+    text-align: center;
+
+    border: 1px solid #f5dce5;
+}
+
+.about-highlight-title {
+    color: #e84f88;
+    font-size: 21px;
+    font-weight: bold;
+    margin-bottom: 12px;
+}
+
+.about-highlight p {
+    color: #555;
+    line-height: 1.8;
+    margin: 0;
+}
+
+
+/* ============================= */
+/* MOBILE */
+/* ============================= */
+
+@media (max-width: 700px) {
+
+    .about-page {
+        margin: 20px auto 35px;
+        padding: 12px;
+    }
+
+    .about-card {
+        padding: 32px 20px;
+        border-radius: 20px;
+    }
+
+    .about-header h1 {
+        font-size: 27px;
+    }
+
+    .about-icon {
+        width: 80px;
+        height: 80px;
+        font-size: 45px;
+    }
+
+    .about-features {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .about-feature {
+        padding: 22px 18px;
+    }
+
+}
+
+</style>
+
+
+<div class="about-page">
+
+    <div class="about-card">
+
+
+        <!-- ============================= -->
+        <!-- HEADER -->
+        <!-- ============================= -->
+
+        <div class="about-header">
+
+            <div class="about-icon">
+                🌸
+            </div>
+
+            <h1>
+                About Handmade Blooms
+            </h1>
+
+            <p>
+                Handmade with love, made to make every moment special. 💖
+            </p>
+
+        </div>
+
+
+        <!-- ============================= -->
+        <!-- INTRO -->
+        <!-- ============================= -->
+
+        <div class="about-intro">
+
+            <p>
+                Welcome to Handmade Blooms! 🌷
+                We believe that a beautiful gift is not just something
+                you give, but something that creates a beautiful memory.
+                Our aim is to bring handmade flowers and thoughtful
+                gifting options together in one lovely place.
+            </p>
+
+        </div>
+
+
+        <!-- ============================= -->
+        <!-- FEATURES -->
+        <!-- ============================= -->
+
+        <div class="about-features">
+
+
+            <div class="about-feature">
+
+                <div class="about-feature-icon">
+                    🌷
+                </div>
+
+                <h3>
+                    Handmade
+                </h3>
+
+                <p>
+                    Beautiful handmade flowers created
+                    with care and attention.
+                </p>
+
+            </div>
+
+
+            <div class="about-feature">
+
+                <div class="about-feature-icon">
+                    💐
+                </div>
+
+                <h3>
+                    Custom Bouquets
+                </h3>
+
+                <p>
+                    Create a bouquet that feels personal
+                    and special.
+                </p>
+
+            </div>
+
+
+            <div class="about-feature">
+
+                <div class="about-feature-icon">
+                    ❤️
+                </div>
+
+                <h3>
+                    Made With Care
+                </h3>
+
+                <p>
+                    Every order is prepared with love
+                    and thoughtful care.
+                </p>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- ============================= -->
+        <!-- WHO WE ARE -->
+        <!-- ============================= -->
+
+        <div class="about-section">
+
+            <h2>
+                🌷 Who We Are
+            </h2>
+
+            <p>
+                Handmade Blooms is a flower and handmade gifting
+                store based in Pali, Rajasthan. We bring beautiful
+                handmade flowers and gifting options together in
+                one place, making it easier to find something
+                meaningful for your loved ones.
+            </p>
+
+        </div>
+
+
+        <!-- ============================= -->
+        <!-- WHAT WE OFFER -->
+        <!-- ============================= -->
+
+        <div class="about-section">
+
+            <h2>
+                💐 What We Offer
+            </h2>
+
+            <p>
+                From individual handmade flowers to custom bouquets,
+                Handmade Blooms gives you the freedom to choose
+                something special. You can explore our flowers,
+                select available colours, and create a gift that
+                matches your occasion and feelings.
+            </p>
+
+        </div>
+
+
+        <!-- ============================= -->
+        <!-- OUR GOAL -->
+        <!-- ============================= -->
+
+        <div class="about-section">
+
+            <h2>
+                ❤️ Our Goal
+            </h2>
+
+            <p>
+                Our goal is to make gifting simple, beautiful and
+                memorable while providing every customer with a
+                pleasant shopping experience. We want every order
+                from Handmade Blooms to feel thoughtful and special.
+            </p>
+
+        </div>
+
+
+        <!-- ============================= -->
+        <!-- HIGHLIGHT -->
+        <!-- ============================= -->
+
+        <div class="about-highlight">
+
+            <div class="about-highlight-title">
+                🌸 Handmade Blooms
+            </div>
+
+            <p>
+                📍 Pali, Rajasthan
+                <br>
+                💐 Beautiful handmade flowers
+                <br>
+                💖 Made with care and love
+            </p>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+{% endblock %}

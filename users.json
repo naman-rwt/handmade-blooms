@@ -6,5 +6,13 @@
         "mobile": "7726824244",
         "password": "scrypt:32768:8:1$26G71DaoKvKD5VOB$2d1fde1ef924dc2e81789b65a2625331c91dec89c6b09a8426d0d4c6aad26f87ea48153ab75bfe1c7c16fea4ad3964f5f5f749364a3d8c16313903777dc3058d",
         "created_at": "08-09-2026 05:44 PM"
+    },
+    {
+        "id": "user_268101",
+        "name": "naman",
+        "email": "2007nehaarawat@gmail.com",
+        "mobile": "8302073970",
+        "password": "scrypt:32768:8:1$816iar3IjLqRZaaW$eb2d80f1dc7236faf8c704417de26244ea0ffb47689ae4eaa831f55693999489933cb5c086c0855b88e29be24218edef3f7c7b2fc37a738227b03d10f4b724c6",
+        "created_at": "09-09-2026 08:24 PM"
     }
 ]

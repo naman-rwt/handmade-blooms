@@ -29,6 +29,51 @@
             justify-content: space-between !important;
         }
 
+
+        /* ============================= */
+        /* BACK ARROW */
+        /* ============================= */
+
+        .back-arrow-container {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px 25px 0;
+        }
+
+        .back-arrow-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+
+            padding: 8px 14px;
+
+            border: 1px solid #f0d9e1;
+            border-radius: 9px;
+
+            background: white;
+            color: #ff4f91;
+
+            font-size: 15px;
+            font-weight: bold;
+
+            cursor: pointer;
+
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+            transition:
+                background 0.2s ease,
+                color 0.2s ease,
+                transform 0.2s ease;
+        }
+
+        .back-arrow-button:hover {
+            background: #fff0f5;
+            color: #ff2f7d;
+            transform: translateX(-2px);
+        }
+
+
         /* ============================= */
         /* HAMBURGER BUTTON */
         /* ============================= */
@@ -44,6 +89,7 @@
             line-height: 1;
         }
 
+
         /* ============================= */
         /* HIDE OLD NAVBAR */
         /* ============================= */
@@ -51,6 +97,7 @@
         header nav {
             display: none !important;
         }
+
 
         /* ============================= */
         /* SIDE MENU */
@@ -60,19 +107,29 @@
             position: fixed;
             top: 0;
             left: -320px;
+
             width: 290px;
             max-width: 80%;
+
             height: 100vh;
+
             background: white;
+
             z-index: 9999;
-            box-shadow: 4px 0 18px rgba(0, 0, 0, 0.25);
-            transition: left 0.3s ease;
+
+            box-shadow:
+                4px 0 18px rgba(0, 0, 0, 0.25);
+
+            transition:
+                left 0.3s ease;
+
             overflow-y: auto;
         }
 
         .side-menu.open {
             left: 0;
         }
+
 
         /* ============================= */
         /* SIDE MENU HEADER */
@@ -81,7 +138,9 @@
         .side-menu-header {
             background: #ff6fa5;
             color: white;
+
             padding: 20px;
+
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -96,10 +155,14 @@
             background: none;
             border: none;
             color: white;
+
             font-size: 32px;
+
             cursor: pointer;
+
             line-height: 1;
         }
+
 
         /* ============================= */
         /* MENU LINKS */
@@ -111,17 +174,26 @@
 
         .side-menu-links a {
             display: block;
+
             padding: 16px 22px;
+
             color: #333;
+
             text-decoration: none;
+
             font-size: 17px;
-            border-bottom: 1px solid #eeeeee;
-            transition: background 0.2s ease;
+
+            border-bottom:
+                1px solid #eeeeee;
+
+            transition:
+                background 0.2s ease;
         }
 
         .side-menu-links a:hover {
             background: #fff0f5;
         }
+
 
         /* ============================= */
         /* OVERLAY */
@@ -129,9 +201,14 @@
 
         .menu-overlay {
             position: fixed;
+
             inset: 0;
-            background: rgba(0, 0, 0, 0.4);
+
+            background:
+                rgba(0, 0, 0, 0.4);
+
             z-index: 9998;
+
             display: none;
         }
 
@@ -139,17 +216,38 @@
             display: block;
         }
 
+
+        /* ============================= */
+        /* MOBILE BACK ARROW */
+        /* ============================= */
+
+        @media (max-width: 600px) {
+
+            .back-arrow-container {
+                padding: 10px 15px 0;
+            }
+
+            .back-arrow-button {
+                padding: 7px 12px;
+                font-size: 14px;
+            }
+
+        }
+
     </style>
 
 </head>
 
+
 <body>
+
 
 <header>
 
     <div class="logo">
         🌸 Handmade Blooms
     </div>
+
 
     <!-- HAMBURGER BUTTON -->
 
@@ -163,6 +261,28 @@
     </button>
 
 </header>
+
+
+<!-- ============================= -->
+<!-- BACK ARROW -->
+<!-- ============================= -->
+
+{% if request.path != "/" %}
+
+<div class="back-arrow-container">
+
+    <button
+        type="button"
+        class="back-arrow-button"
+        onclick="goBack()"
+        aria-label="Go back"
+    >
+        ← Back
+    </button>
+
+</div>
+
+{% endif %}
 
 
 <!-- ============================= -->
@@ -191,6 +311,7 @@
             🌸 Handmade Blooms
         </h2>
 
+
         <button
             type="button"
             class="close-menu"
@@ -209,17 +330,30 @@
             🏠 Home
         </a>
 
+
         <a href="/cart">
             🛒 Cart
         </a>
 
+
         <a href="/wishlist">
             ❤️ Wishlist
         </a>
+        <a href="/about">
+    📖 About Us
+        </a>
+        <a href="/faq">
+    ❓ FAQ
+        </a>
+
 
         <a href="/track_order">
             📦 Track Order
         </a>
+        <a href="/contact">
+    📩 Contact Us
+        </a>
+
 
         <a href="/my_orders">
             📦 My Orders
@@ -232,15 +366,18 @@
             👤 Account
         </a>
 
+
         <a href="/logout">
             🚪 Logout
         </a>
+
 
         {% else %}
 
         <a href="/login">
             🔐 Login
         </a>
+
 
         <a href="/signup">
             🌸 Create Account
@@ -263,14 +400,76 @@
 
 <footer>
 
-    <p>
+    <div class="footer-content">
+
+        <div class="footer-brand">
+            🌸 <strong>Handmade Blooms</strong>
+            <p>
+                Handmade flowers made with love. 💖
+            </p>
+        </div>
+
+
+        <div class="footer-links">
+
+            <a href="/about">
+                About Us
+            </a>
+
+            <a href="/faq">
+                FAQ
+            </a>
+
+            <a href="/contact">
+                Contact Us
+            </a>
+
+            <a href="/track_order">
+                Track Order
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="footer-bottom">
+
         © 2026 Handmade Blooms | Pali, Rajasthan
-    </p>
+
+    </div>
 
 </footer>
 
 
 <script>
+
+
+    /* ============================= */
+    /* BACK BUTTON */
+    /* ============================= */
+
+    function goBack() {
+
+        if (
+            document.referrer &&
+            document.referrer !== window.location.href
+        ) {
+
+            window.history.back();
+
+        } else {
+
+            window.location.href = "/";
+
+        }
+
+    }
+
+
+    /* ============================= */
+    /* OPEN MENU */
+    /* ============================= */
 
     function openMenu() {
 
@@ -279,6 +478,7 @@
             .classList
             .add("open");
 
+
         document
             .getElementById("menuOverlay")
             .classList
@@ -287,12 +487,17 @@
     }
 
 
+    /* ============================= */
+    /* CLOSE MENU */
+    /* ============================= */
+
     function closeMenu() {
 
         document
             .getElementById("sideMenu")
             .classList
             .remove("open");
+
 
         document
             .getElementById("menuOverlay")
@@ -301,7 +506,9 @@
 
     }
 
+
 </script>
+
 
 </body>
 

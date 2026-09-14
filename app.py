@@ -1,10 +1,11 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session , url_for
+from werkzeug.security import generate_password_hash, check_password_hash
 import json
 import os
 import random
 import re
 from datetime import datetime, timedelta
-from werkzeug.security import generate_password_hash, check_password_hash
+import razorpay
 
 
 app = Flask(__name__)
@@ -15,8 +16,23 @@ ORDERS_FILE = "orders.json"
 NOTIFICATIONS_FILE = "notifications.json"
 REVIEWS_FILE = "reviews.json"
 USERS_FILE = "users.json"
+CONTACTS_FILE = "contacts.json"
 
 ADMIN_PASSWORD = "HBadmin123"
+
+# =========================================
+# RAZORPAY TEST MODE
+# =========================================
+# Paste your Razorpay TEST Key ID and TEST Key Secret here.
+# Never share the Key Secret with anyone.
+RAZORPAY_KEY_ID = "rzp_test_TbY41mYXGAlvtb"
+RAZORPAY_KEY_SECRET = "26rGTCXWiE51ipz4tBPZrR43"
+print("KEY =", RAZORPAY_KEY_ID)
+print("SECRET =", RAZORPAY_KEY_SECRET)
+
+razorpay_client = razorpay.Client(
+    auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET)
+)
 
 
 # =========================================
@@ -40,34 +56,114 @@ COUPONS = {
 # =========================================
 
 PRODUCTS = [
-    {
-        "id": "sunflower",
-        "name": "Sunflower",
-        "price": 150,
-        "image": "sunflower.png",
-        "description": "Bright and cheerful handmade sunflower, crafted with care."
-    },
-    {
-        "id": "lily",
-        "name": "Lily",
-        "price": 150,
-        "image": "lily.png",
-        "description": "Elegant handmade lily, perfect for gifting and special moments."
-    },
-    {
-        "id": "mix_brown_lily",
-        "name": "Mix Brown Lily",
-        "price": 160,
-        "image": "mix_brown_lily.png",
-        "description": "A beautiful handmade mix brown lily with a warm, elegant look."
-    },
+
     {
         "id": "rose",
         "name": "Rose",
-        "price": 140,
+        "price": 150,
+        "sizes": {
+            "M": 150
+        },
         "image": "rose.png",
-        "description": "Beautiful handmade rose, crafted with love for your special moments."
+        "description": "Beautiful handmade rose."
+    },
+
+    {
+        "id": "lavender",
+        "name": "Lavender",
+        "price": 120,
+        "sizes": {
+            "M": 120
+        },
+        "image": "lavender.png",
+        "description": "Beautiful handmade lavender flower."
+    },
+
+    {
+        "id": "daisy",
+        "name": "Daisy",
+        "price": 79,
+        "sizes": {
+            "M": 79,
+            "L": 120
+        },
+        "image": "daisy.png",
+        "description": "Beautiful handmade daisy flower."
+    },
+
+    {
+        "id": "lotus",
+        "name": "Lotus",
+        "price": 110,
+        "sizes": {
+            "M": 110,
+            "L": 160
+        },
+        "image": "lotus.jpeg",
+        "description": "Beautiful handmade lotus flower."
+    },
+
+    {
+        "id": "simple_lily",
+        "name": "Simple Lily",
+        "price": 79,
+        "sizes": {
+            "S": 79,
+            "M": 120,
+            "L": 160
+        },
+        "image": "simple_lily.png",
+        "description": "Beautiful handmade simple lily."
+    },
+
+    {
+        "id": "tulip",
+        "name": "Tulip",
+        "price": 79,
+        "sizes": {
+            "M": 79,
+            "L": 120
+        },
+        "image": "tulip.jpeg",
+        "description": "Beautiful handmade tulip flower."
+    },
+
+    {
+        "id": "sunflower",
+        "name": "Sunflower",
+        "price": 100,
+        "sizes": {
+            "M": 100,
+            "L": 150
+        },
+        "image": "sunflower.png",
+        "description": "Bright and cheerful handmade sunflower."
+    },
+
+    {
+        "id": "lily",
+        "name": "Lily",
+        "price": 120,
+        "sizes": {
+            "M": 120,
+            "L": 160
+        },
+        "image": "lily.png",
+        "description": "Elegant handmade lily."
+    },
+
+    {
+        "id": "mix_shade_lily",
+        "name": "Mix Shade Lily",
+        "price": 120,
+        "sizes": {
+            "M": 120,
+            "L": 160
+        },
+        "image": "mix_shade_lily.png",
+        "description": "Beautiful handmade mix shade lily."
     }
+
 ]
 
 
@@ -102,8 +198,29 @@ def safe_integer(value, default=0):
         return default
 
 
+def get_logged_in_user():
+
+    return session.get("user")
+
+
+def safe_next_url(next_page):
+
+    next_page = str(next_page or "").strip()
+
+    if not next_page:
+        return ""
+
+    if (
+        next_page.startswith("/")
+        and not next_page.startswith("//")
+    ):
+        return next_page
+
+    return ""
+
+
 # =========================================
-# USER / CUSTOMER ACCOUNT FUNCTIONS
+# USER FILE FUNCTIONS
 # =========================================
 
 def load_users():
@@ -159,52 +276,61 @@ def save_users(users):
         return False
 
 
-def generate_customer_id():
+# =========================================
+# CONTACT FILE FUNCTIONS
+# =========================================
 
-    users = load_users()
+def load_contacts():
 
-    existing_ids = {
-        str(user.get("customer_id", ""))
-        for user in users
-    }
+    if not os.path.exists(CONTACTS_FILE):
+        return []
 
-    while True:
+    try:
 
-        customer_id = (
-            "HBUSER" +
-            str(random.randint(100000, 999999))
-        )
+        with open(
+            CONTACTS_FILE,
+            "r",
+            encoding="utf-8"
+        ) as file:
 
-        if customer_id not in existing_ids:
-            return customer_id
+            data = json.load(file)
 
+            if isinstance(data, list):
+                return data
 
-def get_logged_in_user():
+            return []
 
-    customer_id = session.get(
-        "customer_id",
-        ""
-    )
+    except (
+        json.JSONDecodeError,
+        FileNotFoundError,
+        OSError
+    ):
 
-    if not customer_id:
-        return None
-
-    users = load_users()
-
-    for user in users:
-
-        if str(
-            user.get("customer_id", "")
-        ) == str(customer_id):
-
-            return user
-
-    return None
+        return []
 
 
-def is_customer_logged_in():
+def save_contacts(contacts):
 
-    return get_logged_in_user() is not None
+    try:
+
+        with open(
+            CONTACTS_FILE,
+            "w",
+            encoding="utf-8"
+        ) as file:
+
+            json.dump(
+                contacts,
+                file,
+                indent=4,
+                ensure_ascii=False
+            )
+
+        return True
+
+    except OSError:
+
+        return False
 
 
 # =========================================
@@ -539,7 +665,10 @@ def verify_product_purchase(
             for item in items:
 
                 item_id = str(
-                    item.get("id", "")
+                    item.get(
+                        "product_id",
+                        item.get("id", "")
+                    )
                 )
 
                 if item_id == str(product_id):
@@ -697,354 +826,6 @@ def calculate_coupon_discount(product_total):
 
 
 # =========================================
-# CUSTOMER ACCOUNT - SIGN UP
-# =========================================
-
-@app.route(
-    "/signup",
-    methods=["GET", "POST"]
-)
-def signup():
-
-    if is_customer_logged_in():
-        return redirect("/account")
-
-    error = None
-
-    if request.method == "POST":
-
-        name = clean_text(
-            request.form.get(
-                "name",
-                ""
-            ),
-            100
-        )
-
-        email = clean_text(
-            request.form.get(
-                "email",
-                ""
-            ),
-            150
-        ).lower()
-
-        mobile = clean_text(
-            request.form.get(
-                "mobile",
-                ""
-            ),
-            10
-        )
-
-        password = request.form.get(
-            "password",
-            ""
-        )
-
-        confirm_password = request.form.get(
-            "confirm_password",
-            ""
-        )
-
-        if not name or len(name) < 2:
-
-            error = "Please enter a valid name."
-
-        elif not is_valid_email(email):
-
-            error = "Please enter a valid email address."
-
-        elif (
-            not mobile.isdigit()
-            or len(mobile) != 10
-        ):
-
-            error = (
-                "Please enter a valid "
-                "10-digit mobile number."
-            )
-
-        elif len(password) < 6:
-
-            error = (
-                "Password must be at least "
-                "6 characters."
-            )
-
-        elif password != confirm_password:
-
-            error = "Passwords do not match."
-
-        else:
-
-            users = load_users()
-
-            email_exists = False
-            mobile_exists = False
-
-            for user in users:
-
-                if str(
-                    user.get("email", "")
-                ).lower() == email:
-
-                    email_exists = True
-
-                if str(
-                    user.get("mobile", "")
-                ) == mobile:
-
-                    mobile_exists = True
-
-            if email_exists:
-
-                error = (
-                    "An account with this "
-                    "email already exists."
-                )
-
-            elif mobile_exists:
-
-                error = (
-                    "An account with this "
-                    "mobile number already exists."
-                )
-
-            else:
-
-                customer_id = generate_customer_id()
-
-                new_user = {
-
-                    "customer_id": customer_id,
-
-                    "name": name,
-
-                    "email": email,
-
-                    "mobile": mobile,
-
-                    "password": generate_password_hash(
-                        password
-                    ),
-
-                    "created_at": datetime.now().strftime(
-                        "%d-%m-%Y %I:%M %p"
-                    )
-                }
-
-                users.append(new_user)
-
-                if save_users(users):
-
-                    session["customer_id"] = customer_id
-                    session["customer_mobile"] = mobile
-
-                    session.modified = True
-
-                    return redirect("/account")
-
-                error = (
-                    "Account could not be created. "
-                    "Please try again."
-                )
-
-    return render_template(
-        "signup.html",
-        error=error,
-        cart_count=get_cart_count(),
-        wishlist_count=get_wishlist_count()
-    )
-
-
-# =========================================
-# CUSTOMER ACCOUNT - LOGIN
-# =========================================
-
-@app.route(
-    "/login",
-    methods=["GET", "POST"]
-)
-def login():
-
-    if is_customer_logged_in():
-        return redirect("/account")
-
-    error = None
-
-    if request.method == "POST":
-
-        email = clean_text(
-            request.form.get(
-                "email",
-                ""
-            ),
-            150
-        ).lower()
-
-        password = request.form.get(
-            "password",
-            ""
-        )
-
-        if not is_valid_email(email):
-
-            error = (
-                "Please enter a valid "
-                "email address."
-            )
-
-        elif not password:
-
-            error = "Please enter your password."
-
-        else:
-
-            users = load_users()
-
-            found_user = None
-
-            for user in users:
-
-                if str(
-                    user.get("email", "")
-                ).lower() == email:
-
-                    found_user = user
-                    break
-
-            if found_user is None:
-
-                error = (
-                    "No account found "
-                    "with this email."
-                )
-
-            else:
-
-                stored_password = str(
-                    found_user.get(
-                        "password",
-                        ""
-                    )
-                )
-
-                if check_password_hash(
-                    stored_password,
-                    password
-                ):
-
-                    session["customer_id"] = (
-                        found_user.get(
-                            "customer_id",
-                            ""
-                        )
-                    )
-
-                    session["customer_mobile"] = (
-                        found_user.get(
-                            "mobile",
-                            ""
-                        )
-                    )
-
-                    session.modified = True
-
-                    return redirect("/account")
-
-                error = "Incorrect password."
-
-    return render_template(
-        "login.html",
-        error=error,
-        cart_count=get_cart_count(),
-        wishlist_count=get_wishlist_count()
-    )
-
-
-# =========================================
-# CUSTOMER ACCOUNT - LOGOUT
-# =========================================
-
-@app.route("/logout")
-def logout():
-
-    session.pop(
-        "customer_id",
-        None
-    )
-
-    session.pop(
-        "customer_mobile",
-        None
-    )
-
-    return redirect("/")
-
-
-# =========================================
-# CUSTOMER ACCOUNT PAGE
-# =========================================
-
-@app.route("/account")
-def account():
-
-    user = get_logged_in_user()
-
-    if user is None:
-        return redirect("/login")
-
-    customer_id = user.get(
-        "customer_id",
-        ""
-    )
-
-    all_orders = load_orders()
-
-    customer_orders = []
-
-    for order in all_orders:
-
-        if str(
-            order.get(
-                "customer_id",
-                ""
-            )
-        ) == str(customer_id):
-
-            customer_orders.append(order)
-
-        elif (
-            not order.get("customer_id")
-            and
-            str(
-                order.get(
-                    "mobile",
-                    ""
-                )
-            ) == str(
-                user.get(
-                    "mobile",
-                    ""
-                )
-            )
-        ):
-
-            customer_orders.append(order)
-
-    customer_orders.reverse()
-
-    return render_template(
-        "account.html",
-        user=user,
-        orders=customer_orders,
-        cart_count=get_cart_count(),
-        wishlist_count=get_wishlist_count()
-    )
-
-
-# =========================================
 # HOME
 # =========================================
 
@@ -1128,67 +909,62 @@ def add_review(product_id):
         return redirect("/")
 
     name = clean_text(
-        request.form.get("name", ""),
+        request.form.get(
+            "name",
+            ""
+        ),
         100
     )
 
     review_text = clean_text(
-        request.form.get("review", ""),
+        request.form.get(
+            "review",
+            ""
+        ),
         1000
     )
 
     rating = safe_integer(
-        request.form.get("rating", 0),
+        request.form.get(
+            "rating",
+            0
+        ),
         0
     )
 
     order_id = clean_text(
-        request.form.get("order_id", ""),
+        request.form.get(
+            "order_id",
+            ""
+        ),
         50
     ).upper()
 
     mobile = clean_text(
-        request.form.get("mobile", ""),
+        request.form.get(
+            "mobile",
+            ""
+        ),
         10
     )
 
     if not name or len(name) < 2:
-
-        return redirect(
-            "/product/" +
-            product_id
-        )
+        return redirect("/product/" + product_id)
 
     if not review_text or len(review_text) < 3:
-
-        return redirect(
-            "/product/" +
-            product_id
-        )
+        return redirect("/product/" + product_id)
 
     if rating < 1 or rating > 5:
-
-        return redirect(
-            "/product/" +
-            product_id
-        )
+        return redirect("/product/" + product_id)
 
     if (
         not mobile.isdigit()
         or len(mobile) != 10
     ):
-
-        return redirect(
-            "/product/" +
-            product_id
-        )
+        return redirect("/product/" + product_id)
 
     if not order_id:
-
-        return redirect(
-            "/product/" +
-            product_id
-        )
+        return redirect("/product/" + product_id)
 
     verified_purchase = verify_product_purchase(
         product_id,
@@ -1197,22 +973,14 @@ def add_review(product_id):
     )
 
     if not verified_purchase:
-
-        return redirect(
-            "/product/" +
-            product_id
-        )
+        return redirect("/product/" + product_id)
 
     if has_existing_review(
         product_id,
         order_id,
         mobile
     ):
-
-        return redirect(
-            "/product/" +
-            product_id
-        )
+        return redirect("/product/" + product_id)
 
     reviews = load_reviews()
 
@@ -1264,10 +1032,7 @@ def add_review(product_id):
         order_id
     )
 
-    return redirect(
-        "/product/" +
-        product_id
-    )
+    return redirect("/product/" + product_id)
 
 
 # =========================================
@@ -1292,7 +1057,10 @@ def add_to_cart(product_id):
         return redirect("/")
 
     quantity = safe_integer(
-        request.args.get("quantity", 1),
+        request.args.get(
+            "quantity",
+            1
+        ),
         1
     )
 
@@ -1302,7 +1070,108 @@ def add_to_cart(product_id):
     if quantity > 99:
         quantity = 99
 
-    cart = session.get("cart", [])
+    sizes = product.get(
+        "sizes",
+        {}
+    )
+
+    selected_size = clean_text(
+        request.args.get(
+            "size",
+            ""
+        ),
+        30
+    )
+
+    if not sizes:
+
+        selected_size = "One Size"
+
+        selected_price = safe_integer(
+            product.get(
+                "price",
+                0
+            ),
+            0
+        )
+
+    elif len(sizes) == 1:
+
+        selected_size = next(
+            iter(sizes)
+        )
+
+        selected_price = safe_integer(
+            sizes[selected_size],
+            0
+        )
+
+    else:
+
+        if selected_size not in sizes:
+
+            return redirect(
+                "/product/" +
+                product_id
+            )
+
+        selected_price = safe_integer(
+            sizes[selected_size],
+            0
+        )
+
+    color_required = (
+        product_id != "lavender"
+        and
+        product_id != "sunflower"
+    )
+
+    selected_color = clean_text(
+        request.args.get(
+            "color",
+            ""
+        ),
+        50
+    )
+
+    if color_required and not selected_color:
+
+        return redirect(
+            "/product/" +
+            product_id
+        )
+
+    if not color_required:
+        selected_color = ""
+
+    size_key = (
+        selected_size
+        .lower()
+        .replace(" ", "_")
+    )
+
+    color_key = ""
+
+    if selected_color:
+
+        color_key = (
+            "__" +
+            selected_color
+            .lower()
+            .replace(" ", "_")
+        )
+
+    cart_item_id = (
+        product_id +
+        "__" +
+        size_key +
+        color_key
+    )
+
+    cart = session.get(
+        "cart",
+        []
+    )
 
     if not isinstance(cart, list):
         cart = []
@@ -1311,10 +1180,26 @@ def add_to_cart(product_id):
 
     for item in cart:
 
-        if item.get("id") == product_id:
+        existing_cart_item_id = str(
+            item.get(
+                "cart_item_id",
+                item.get(
+                    "id",
+                    ""
+                )
+            )
+        )
+
+        if (
+            existing_cart_item_id ==
+            cart_item_id
+        ):
 
             old_quantity = safe_integer(
-                item.get("quantity", 0),
+                item.get(
+                    "quantity",
+                    0
+                ),
                 0
             )
 
@@ -1324,21 +1209,50 @@ def add_to_cart(product_id):
             )
 
             found = True
+
             break
 
     if not found:
 
-        cart.append(
-            {
-                "id": product["id"],
-                "name": product["name"],
-                "price": product["price"],
-                "image": product["image"],
-                "quantity": quantity
-            }
-        )
+        item_name = product["name"]
+
+        if len(sizes) > 1:
+
+            item_name += (
+                " - " +
+                selected_size
+            )
+
+        if selected_color:
+
+            item_name += (
+                " - " +
+                selected_color
+            )
+
+        cart.append({
+
+            "id": cart_item_id,
+
+            "product_id": product["id"],
+
+            "cart_item_id": cart_item_id,
+
+            "name": item_name,
+
+            "price": selected_price,
+
+            "image": product["image"],
+
+            "quantity": quantity,
+
+            "size": selected_size,
+
+            "color": selected_color
+        })
 
     session["cart"] = cart
+
     session.modified = True
 
     return redirect("/cart")
@@ -1412,6 +1326,7 @@ def add_to_wishlist(product_id):
             wishlist.append(product_id)
 
     session["wishlist"] = wishlist
+
     session.modified = True
 
     return redirect(
@@ -1439,6 +1354,7 @@ def remove_from_wishlist(product_id):
     ]
 
     session["wishlist"] = wishlist
+
     session.modified = True
 
     return redirect(
@@ -1462,6 +1378,53 @@ def wishlist_add_to_cart(product_id):
     if product is None:
         return redirect("/wishlist")
 
+    if (
+        product_id != "lavender"
+        and
+        product_id != "sunflower"
+    ):
+
+        return redirect(
+            "/product/" +
+            product_id
+        )
+
+    sizes = product.get(
+        "sizes",
+        {}
+    )
+
+    if len(sizes) > 1:
+
+        return redirect(
+            "/product/" +
+            product_id
+        )
+
+    selected_size = next(
+        iter(sizes),
+        "One Size"
+    )
+
+    selected_price = safe_integer(
+        sizes.get(
+            selected_size,
+            product.get(
+                "price",
+                0
+            )
+        ),
+        0
+    )
+
+    cart_item_id = (
+        product_id +
+        "__" +
+        selected_size
+        .lower()
+        .replace(" ", "_")
+    )
+
     cart = session.get(
         "cart",
         []
@@ -1474,10 +1437,26 @@ def wishlist_add_to_cart(product_id):
 
     for item in cart:
 
-        if item.get("id") == product_id:
+        existing_cart_item_id = str(
+            item.get(
+                "cart_item_id",
+                item.get(
+                    "id",
+                    ""
+                )
+            )
+        )
+
+        if (
+            existing_cart_item_id ==
+            cart_item_id
+        ):
 
             old_quantity = safe_integer(
-                item.get("quantity", 0),
+                item.get(
+                    "quantity",
+                    0
+                ),
                 0
             )
 
@@ -1487,21 +1466,42 @@ def wishlist_add_to_cart(product_id):
             )
 
             found = True
+
             break
 
     if not found:
 
-        cart.append(
-            {
-                "id": product["id"],
-                "name": product["name"],
-                "price": product["price"],
-                "image": product["image"],
-                "quantity": 1
-            }
-        )
+        cart.append({
+
+            "id": cart_item_id,
+
+            "product_id": product["id"],
+
+            "cart_item_id": cart_item_id,
+
+            "name": (
+                product["name"] +
+                (
+                    " - " +
+                    selected_size
+                    if len(sizes) > 1
+                    else ""
+                )
+            ),
+
+            "price": selected_price,
+
+            "image": product["image"],
+
+            "quantity": 1,
+
+            "size": selected_size,
+
+            "color": ""
+        })
 
     session["cart"] = cart
+
     session.modified = True
 
     return redirect("/cart")
@@ -1532,12 +1532,18 @@ def cart():
     for item in cart_items:
 
         price = safe_integer(
-            item.get("price", 0),
+            item.get(
+                "price",
+                0
+            ),
             0
         )
 
         quantity = safe_integer(
-            item.get("quantity", 0),
+            item.get(
+                "quantity",
+                0
+            ),
             0
         )
 
@@ -1547,7 +1553,10 @@ def cart():
         if quantity < 0:
             quantity = 0
 
-        total += price * quantity
+        total += (
+            price *
+            quantity
+        )
 
     return render_template(
         "cart.html",
@@ -1561,26 +1570,38 @@ def cart():
 @app.route("/increase/<item_id>")
 def increase(item_id):
 
-    cart = session.get("cart", [])
+    cart = session.get(
+        "cart",
+        []
+    )
 
     if not isinstance(cart, list):
         cart = []
 
     for item in cart:
 
-        if str(item.get("id")) == str(item_id):
+        if str(
+            item.get("id")
+        ) == str(item_id):
 
             quantity = safe_integer(
-                item.get("quantity", 1),
+                item.get(
+                    "quantity",
+                    1
+                ),
                 1
             )
 
             if quantity < 99:
-                item["quantity"] = quantity + 1
+
+                item["quantity"] = (
+                    quantity + 1
+                )
 
             break
 
     session["cart"] = cart
+
     session.modified = True
 
     return redirect("/cart")
@@ -1589,29 +1610,42 @@ def increase(item_id):
 @app.route("/decrease/<item_id>")
 def decrease(item_id):
 
-    cart = session.get("cart", [])
+    cart = session.get(
+        "cart",
+        []
+    )
 
     if not isinstance(cart, list):
         cart = []
 
     for item in cart:
 
-        if str(item.get("id")) == str(item_id):
+        if str(
+            item.get("id")
+        ) == str(item_id):
 
             quantity = safe_integer(
-                item.get("quantity", 1),
+                item.get(
+                    "quantity",
+                    1
+                ),
                 1
             )
 
             if quantity > 1:
-                item["quantity"] = quantity - 1
+
+                item["quantity"] = (
+                    quantity - 1
+                )
 
             else:
+
                 cart.remove(item)
 
             break
 
     session["cart"] = cart
+
     session.modified = True
 
     return redirect("/cart")
@@ -1620,7 +1654,10 @@ def decrease(item_id):
 @app.route("/remove/<item_id>")
 def remove(item_id):
 
-    cart = session.get("cart", [])
+    cart = session.get(
+        "cart",
+        []
+    )
 
     if not isinstance(cart, list):
         cart = []
@@ -1628,10 +1665,13 @@ def remove(item_id):
     cart = [
         item
         for item in cart
-        if str(item.get("id")) != str(item_id)
+        if str(
+            item.get("id")
+        ) != str(item_id)
     ]
 
     session["cart"] = cart
+
     session.modified = True
 
     return redirect("/cart")
@@ -1644,7 +1684,10 @@ def remove(item_id):
 @app.route("/checkout")
 def checkout():
 
-    cart_items = session.get("cart", [])
+    cart_items = session.get(
+        "cart",
+        []
+    )
 
     if not cart_items:
         return redirect("/cart")
@@ -1654,12 +1697,18 @@ def checkout():
     for item in cart_items:
 
         price = safe_integer(
-            item.get("price", 0),
+            item.get(
+                "price",
+                0
+            ),
             0
         )
 
         quantity = safe_integer(
-            item.get("quantity", 0),
+            item.get(
+                "quantity",
+                0
+            ),
             0
         )
 
@@ -1669,7 +1718,10 @@ def checkout():
         if quantity < 0:
             quantity = 0
 
-        product_total += price * quantity
+        product_total += (
+            price *
+            quantity
+        )
 
     coupon_code = session.get(
         "coupon_code",
@@ -1685,8 +1737,6 @@ def checkout():
         None
     )
 
-    user = get_logged_in_user()
-
     return render_template(
         "checkout.html",
         cart_items=cart_items,
@@ -1694,7 +1744,7 @@ def checkout():
         coupon_code=coupon_code,
         discount=discount,
         coupon_error=coupon_error,
-        user=user,
+        user=get_logged_in_user(),
         cart_count=get_cart_count(),
         wishlist_count=get_wishlist_count()
     )
@@ -1775,7 +1825,7 @@ def remove_coupon():
 
 
 # =========================================
-# PLACE ORDER
+# PLACE ORDER / CREATE RAZORPAY PAYMENT
 # =========================================
 
 @app.route(
@@ -1803,7 +1853,7 @@ def place_order():
     email = clean_text(
         request.form.get("email", ""),
         150
-    )
+    ).lower()
 
     mobile = clean_text(
         request.form.get("mobile", ""),
@@ -1842,14 +1892,8 @@ def place_order():
     if not is_valid_email(email):
         return "Please enter a valid email address."
 
-    if (
-        not mobile.isdigit()
-        or len(mobile) != 10
-    ):
-        return (
-            "Invalid mobile number. "
-            "Please enter exactly 10 digits."
-        )
+    if not mobile.isdigit() or len(mobile) != 10:
+        return "Invalid mobile number. Please enter exactly 10 digits."
 
     if not address:
         return "Please enter your address."
@@ -1860,18 +1904,15 @@ def place_order():
     if not state:
         return "Please enter your state."
 
-    if (
-        not pincode.isdigit()
-        or len(pincode) != 6
-    ):
-        return (
-            "Invalid pincode. "
-            "Please enter exactly 6 digits."
-        )
+    if not pincode.isdigit() or len(pincode) != 6:
+        return "Invalid pincode. Please enter exactly 6 digits."
 
     product_total = 0
 
     for item in cart_items:
+
+        if not isinstance(item, dict):
+            continue
 
         price = safe_integer(
             item.get("price", 0),
@@ -1898,25 +1939,17 @@ def place_order():
         product_total += price * quantity
 
     if product_total <= 0:
+        return "Your cart is empty or invalid. Please add a product again."
 
-        return (
-            "Your cart is empty or invalid. "
-            "Please add a product again."
-        )
+    coupon_code = str(
+        session.get("coupon_code", "")
+    ).upper()
 
-    coupon_code = session.get(
-        "coupon_code",
-        ""
-    )
-
-    discount = calculate_coupon_discount(
-        product_total
-    )
-
-    if coupon_code and coupon_code not in COUPONS:
-
+    if coupon_code not in COUPONS:
         coupon_code = ""
-        discount = 0
+        session.pop("coupon_code", None)
+
+    discount = calculate_coupon_discount(product_total)
 
     delivery_charge = (
         0
@@ -1933,96 +1966,361 @@ def place_order():
     if final_total < 0:
         final_total = 0
 
+    # Razorpay amount must be sent in paise.
+    razorpay_amount = int(final_total * 100)
+
+    if razorpay_amount <= 0:
+        return "Invalid payment amount. Please try again."
+
+    site_order_id = generate_order_id()
+
+    try:
+
+        razorpay_order = razorpay_client.order.create({
+            "amount": razorpay_amount,
+            "currency": "INR",
+            "receipt": site_order_id,
+            "notes": {
+                "customer_name": name,
+                "customer_mobile": mobile
+            }
+        })
+
+    except Exception as error:
+
+        print("Razorpay order creation error:", error)
+
+        return "RAZORPAY ERROR: " + str(error)
+
     delivery_date_object = (
-        datetime.now()
-        + timedelta(days=10)
+        datetime.now() + timedelta(days=10)
     )
 
-    delivery_date = (
-        delivery_date_object.strftime(
-            "%d-%m-%Y"
-        )
+    delivery_date = delivery_date_object.strftime(
+        "%d-%m-%Y"
     )
 
-    order_id = generate_order_id()
+    # Keep checkout data in the session until Razorpay payment is verified.
+    # The actual order is NOT saved as a paid order until signature verification succeeds.
+    session["pending_payment"] = {
+        "site_order_id": site_order_id,
+        "razorpay_order_id": razorpay_order.get("id", ""),
+        "name": name,
+        "email": email,
+        "mobile": mobile,
+        "address": address,
+        "city": city,
+        "state": state,
+        "pincode": pincode,
+        "items": cart_items,
+        "product_total": product_total,
+        "coupon_code": coupon_code,
+        "discount": discount,
+        "delivery_charge": delivery_charge,
+        "final_total": final_total,
+        "delivery_date": delivery_date
+    }
 
-    logged_in_user = get_logged_in_user()
+    session.modified = True
 
-    customer_id = ""
+    return render_template(
+        "payment.html",
+        razorpay_key_id=RAZORPAY_KEY_ID,
+        razorpay_order_id=razorpay_order.get("id", ""),
+        amount=razorpay_amount,
+        amount_rupees=final_total,
+        amount_paise=razorpay_amount,
+        order_id=site_order_id,
+        customer_name=name,
+        customer_email=email,
+        customer_mobile=mobile,
+        cart_count=get_cart_count(),
+        wishlist_count=get_wishlist_count()
+    )
 
-    if logged_in_user:
 
-        customer_id = logged_in_user.get(
-            "customer_id",
+# =========================================
+# RAZORPAY PAYMENT SUCCESS / VERIFY PAYMENT
+# =========================================
+
+@app.route(
+    "/payment_success",
+    methods=["POST"]
+)
+def payment_success():
+
+    pending_payment = session.get(
+        "pending_payment"
+    )
+
+    if not isinstance(pending_payment, dict):
+        return redirect("/checkout")
+
+    razorpay_payment_id = clean_text(
+        request.form.get(
+            "razorpay_payment_id",
+            ""
+        ),
+        100
+    )
+
+    razorpay_order_id = clean_text(
+        request.form.get(
+            "razorpay_order_id",
+            ""
+        ),
+        100
+    )
+
+    razorpay_signature = clean_text(
+        request.form.get(
+            "razorpay_signature",
+            ""
+        ),
+        200
+    )
+
+    expected_razorpay_order_id = str(
+        pending_payment.get(
+            "razorpay_order_id",
             ""
         )
+    )
 
-    order = {
+    if not razorpay_payment_id:
+        return "Payment verification failed: payment ID is missing."
 
-        "order_id": order_id,
+    if not razorpay_order_id:
+        return "Payment verification failed: order ID is missing."
 
-        "customer_id": customer_id,
+    if not razorpay_signature:
+        return "Payment verification failed: signature is missing."
 
-        "name": name,
+    if (
+        razorpay_order_id !=
+        expected_razorpay_order_id
+    ):
+        return "Payment verification failed: order mismatch."
 
-        "email": email,
+    # Step 1: Verify the Checkout signature on the server.
+    try:
 
-        "mobile": mobile,
+        razorpay_client.utility.verify_payment_signature({
+            "razorpay_order_id": razorpay_order_id,
+            "razorpay_payment_id": razorpay_payment_id,
+            "razorpay_signature": razorpay_signature
+        })
 
-        "address": address,
+    except Exception as error:
 
-        "city": city,
+        print("Razorpay payment verification error:", error)
 
-        "state": state,
-
-        "pincode": pincode,
-
-        "items": cart_items,
-
-        "product_total": product_total,
-
-        "coupon_code": coupon_code,
-
-        "discount": discount,
-
-        "delivery_charge": delivery_charge,
-
-        "final_total": final_total,
-
-        "total": final_total,
-
-        "status": "Pending",
-
-        "delivery_date": delivery_date,
-
-        "delivery_time": "Delivery within 10 days",
-
-        "order_date": datetime.now().strftime(
-            "%d-%m-%Y %I:%M %p"
+        return (
+            "Payment verification failed. "
+            "Please do not place the order again immediately. "
+            "Check the payment status first."
         )
-    }
+
+    # Step 2: Fetch the payment from Razorpay instead of trusting only
+    # the browser callback. This also lets us confirm the amount and order.
+    try:
+
+        payment = razorpay_client.payment.fetch(
+            razorpay_payment_id
+        )
+
+    except Exception as error:
+
+        print("Razorpay payment fetch error:", error)
+
+        return (
+            "Payment was received by Razorpay, but its status could not "
+            "be verified right now. Please check the Razorpay payment "
+            "status before placing the order again."
+        )
+
+    fetched_order_id = str(
+        payment.get("order_id", "")
+    )
+
+    if fetched_order_id != razorpay_order_id:
+        print(
+            "Razorpay order mismatch:",
+            fetched_order_id,
+            razorpay_order_id
+        )
+        return "Payment verification failed: Razorpay order mismatch."
+
+    expected_amount = int(
+        safe_integer(
+            pending_payment.get("final_total", 0),
+            0
+        ) * 100
+    )
+
+    fetched_amount = safe_integer(
+        payment.get("amount", 0),
+        0
+    )
+
+    if fetched_amount != expected_amount:
+        print(
+            "Razorpay amount mismatch:",
+            fetched_amount,
+            expected_amount
+        )
+        return "Payment verification failed: payment amount mismatch."
+
+    payment_status = str(
+        payment.get("status", "")
+    ).lower()
+
+    # If Razorpay has only authorised the payment, capture it before
+    # marking the Handmade Blooms order as paid.
+    if payment_status == "authorized":
+
+        try:
+
+            payment = razorpay_client.payment.capture(
+                razorpay_payment_id,
+                {
+                    "amount": expected_amount,
+                    "currency": "INR"
+                }
+            )
+
+            payment_status = str(
+                payment.get("status", "")
+            ).lower()
+
+        except Exception as error:
+
+            print("Razorpay payment capture error:", error)
+
+            return (
+                "Payment is authorised but has not been captured yet. "
+                "The order has NOT been marked as paid. Please check "
+                "the Razorpay payment status before trying again."
+            )
+
+    # Never mark an order Paid unless Razorpay reports it as captured.
+    if payment_status != "captured":
+
+        print(
+            "Razorpay payment is not captured. Status:",
+            payment_status
+        )
+
+        return (
+            "Payment verification is incomplete. Razorpay payment status: "
+            + (payment_status or "unknown") +
+            ". The order has NOT been marked as paid."
+        )
+
+    order_id = str(
+        pending_payment.get(
+            "site_order_id",
+            ""
+        )
+    )
+
+    if not order_id:
+        return "Order could not be created because the order ID is missing."
 
     orders = load_orders()
 
+    # Prevent duplicate order creation if the success callback is submitted twice.
+    existing_order = next(
+        (
+            order for order in orders
+            if str(
+                order.get("order_id", "")
+            ) == order_id
+        ),
+        None
+    )
+
+    if existing_order is not None:
+
+        session["customer_mobile"] = str(
+            existing_order.get("mobile", "")
+        )
+
+        session.pop(
+            "pending_payment",
+            None
+        )
+
+        session["cart"] = []
+        session.pop("coupon_code", None)
+        session.pop("coupon_error", None)
+        session.modified = True
+
+        return render_template(
+            "confirmation.html",
+            order=existing_order
+        )
+
+    order = {
+        "order_id": order_id,
+        "name": pending_payment.get("name", ""),
+        "email": pending_payment.get("email", ""),
+        "mobile": pending_payment.get("mobile", ""),
+        "address": pending_payment.get("address", ""),
+        "city": pending_payment.get("city", ""),
+        "state": pending_payment.get("state", ""),
+        "pincode": pending_payment.get("pincode", ""),
+        "items": pending_payment.get("items", []),
+        "product_total": pending_payment.get("product_total", 0),
+        "coupon_code": pending_payment.get("coupon_code", ""),
+        "discount": pending_payment.get("discount", 0),
+        "delivery_charge": pending_payment.get("delivery_charge", 0),
+        "final_total": pending_payment.get("final_total", 0),
+        "total": pending_payment.get("final_total", 0),
+        "status": "Pending",
+        "delivery_date": pending_payment.get("delivery_date", ""),
+        "delivery_time": "Delivery within 10 days",
+        "order_date": datetime.now().strftime(
+            "%d-%m-%Y %I:%M %p"
+        ),
+        "payment_status": "Paid",
+        "payment_method": "Razorpay",
+        "razorpay_payment_id": razorpay_payment_id,
+        "razorpay_order_id": razorpay_order_id,
+        "razorpay_signature": razorpay_signature
+    }
+
     orders.append(order)
 
-    save_orders(orders)
+    if not save_orders(orders):
+        return (
+            "Payment was captured and verified, but the order could not be saved. "
+            "Please contact Handmade Blooms with your payment ID: "
+            + razorpay_payment_id
+        )
 
     add_notification(
         "new_order",
-        "New Order Received 🛒",
+        "New Paid Order Received 🛒",
         (
-            "New order " +
+            "New paid order " +
             order_id +
             " placed by " +
-            name +
+            str(order.get("name", "")) +
             ". Total: ₹" +
-            str(final_total)
+            str(order.get("final_total", 0))
         ),
         order_id
     )
 
-    session["customer_mobile"] = mobile
+    session["customer_mobile"] = str(
+        order.get("mobile", "")
+    )
+
+    session.pop(
+        "pending_payment",
+        None
+    )
 
     session["cart"] = []
 
@@ -2045,6 +2343,19 @@ def place_order():
 
 
 # =========================================
+# PAYMENT FAILED / CANCELLED
+# =========================================
+
+@app.route("/payment_failed")
+def payment_failed():
+
+    return render_template(
+        "payment_failed.html",
+        cart_count=get_cart_count(),
+        wishlist_count=get_wishlist_count()
+    )
+
+
 # CUSTOM BOUQUET
 # =========================================
 
@@ -2068,16 +2379,21 @@ def add_custom_bouquet():
     )
 
     if size == "Small":
+
         base_price = 250
 
     elif size == "Medium":
+
         base_price = 500
 
     elif size == "Large":
+
         base_price = 750
 
     else:
+
         size = "Small"
+
         base_price = 250
 
     extra_flowers = safe_integer(
@@ -2109,7 +2425,12 @@ def add_custom_bouquet():
 
     custom_id = (
         "custom_" +
-        str(random.randint(100000, 999999))
+        str(
+            random.randint(
+                100000,
+                999999
+            )
+        )
     )
 
     item = {
@@ -2138,12 +2459,17 @@ def add_custom_bouquet():
         []
     )
 
-    if not isinstance(cart, list):
+    if not isinstance(
+        cart,
+        list
+    ):
+
         cart = []
 
     cart.append(item)
 
     session["cart"] = cart
+
     session.modified = True
 
     return redirect("/cart")
@@ -2181,6 +2507,7 @@ def add_flower_demand():
     )
 
     if not flower_name:
+
         flower_name = "Any Flower"
 
     if not demand_details:
@@ -2192,7 +2519,12 @@ def add_flower_demand():
 
     demand_id = (
         "demand_" +
-        str(random.randint(100000, 999999))
+        str(
+            random.randint(
+                100000,
+                999999
+            )
+        )
     )
 
     message = (
@@ -2227,12 +2559,17 @@ def add_flower_demand():
         []
     )
 
-    if not isinstance(cart, list):
+    if not isinstance(
+        cart,
+        list
+    ):
+
         cart = []
 
     cart.append(item)
 
     session["cart"] = cart
+
     session.modified = True
 
     return redirect("/cart")
@@ -2312,10 +2649,12 @@ def track_order():
 
                 if (
                     existing_order_id == order_id
-                    and existing_mobile == mobile
+                    and
+                    existing_mobile == mobile
                 ):
 
                     order = existing_order
+
                     break
 
             if order is None:
@@ -2350,46 +2689,14 @@ def my_orders():
 
     mobile = ""
 
-    logged_in_user = get_logged_in_user()
+    if request.method == "GET":
 
-    if logged_in_user:
-
-        customer_id = logged_in_user.get(
-            "customer_id",
+        mobile = session.get(
+            "customer_mobile",
             ""
         )
 
-        all_orders = load_orders()
-
-        orders = [
-            order
-            for order in all_orders
-            if str(
-                order.get(
-                    "customer_id",
-                    ""
-                )
-            ) == str(customer_id)
-            or (
-                not order.get("customer_id")
-                and
-                str(
-                    order.get(
-                        "mobile",
-                        ""
-                    )
-                ) == str(
-                    logged_in_user.get(
-                        "mobile",
-                        ""
-                    )
-                )
-            )
-        ]
-
-        orders.reverse()
-
-    elif request.method == "POST":
+    if request.method == "POST":
 
         mobile = clean_text(
             request.form.get(
@@ -2398,6 +2705,8 @@ def my_orders():
             ),
             10
         )
+
+    if mobile:
 
         if (
             not mobile.isdigit()
@@ -2410,37 +2719,6 @@ def my_orders():
             )
 
         else:
-
-            all_orders = load_orders()
-
-            orders = [
-                order
-                for order in all_orders
-                if str(
-                    order.get(
-                        "mobile",
-                        ""
-                    )
-                ) == mobile
-            ]
-
-            orders.reverse()
-
-            if not orders:
-
-                error = (
-                    "No orders found "
-                    "for this mobile number."
-                )
-
-    else:
-
-        mobile = session.get(
-            "customer_mobile",
-            ""
-        )
-
-        if mobile:
 
             all_orders = load_orders()
 
@@ -2494,61 +2772,31 @@ def cancel_order(order_id):
         not mobile.isdigit()
         or len(mobile) != 10
     ):
-        return redirect("/my_orders")
+
+        return redirect(
+            "/my_orders"
+        )
 
     orders = load_orders()
 
-    logged_in_user = get_logged_in_user()
-
-    customer_id = ""
-
-    if logged_in_user:
-
-        customer_id = logged_in_user.get(
-            "customer_id",
-            ""
-        )
-
     for order in orders:
 
-        same_order = (
+        if (
             str(
                 order.get(
                     "order_id",
                     ""
                 )
             ) == str(order_id)
-        )
 
-        same_mobile = (
+            and
+
             str(
                 order.get(
                     "mobile",
                     ""
                 )
             ) == mobile
-        )
-
-        same_customer = (
-            customer_id
-            and
-            str(
-                order.get(
-                    "customer_id",
-                    ""
-                )
-            ) == str(customer_id)
-        )
-
-        if (
-            same_order
-            and
-            same_mobile
-            and
-            (
-                same_customer
-                or not order.get("customer_id")
-            )
         ):
 
             status = order.get(
@@ -2561,7 +2809,11 @@ def cancel_order(order_id):
                 []
             )
 
-            if not isinstance(items, list):
+            if not isinstance(
+                items,
+                list
+            ):
+
                 items = []
 
             has_custom = any(
@@ -2570,7 +2822,9 @@ def cancel_order(order_id):
                         "id",
                         ""
                     )
-                ).startswith("custom_")
+                ).startswith(
+                    "custom_"
+                )
                 for item in items
             )
 
@@ -2580,24 +2834,38 @@ def cancel_order(order_id):
                         "id",
                         ""
                     )
-                ).startswith("demand_")
+                ).startswith(
+                    "demand_"
+                )
                 for item in items
             )
 
-            if has_custom or has_demand:
+            if (
+                has_custom
+                or
+                has_demand
+            ):
 
-                session["customer_mobile"] = mobile
+                session[
+                    "customer_mobile"
+                ] = mobile
 
-                return redirect("/my_orders")
+                return redirect(
+                    "/my_orders"
+                )
 
             if status not in [
                 "Pending",
                 "Processing"
             ]:
 
-                session["customer_mobile"] = mobile
+                session[
+                    "customer_mobile"
+                ] = mobile
 
-                return redirect("/my_orders")
+                return redirect(
+                    "/my_orders"
+                )
 
             order["status"] = "Cancelled"
 
@@ -2608,7 +2876,10 @@ def cancel_order(order_id):
                 "Order Cancelled ❌",
                 (
                     "Customer " +
-                    order.get("name", "") +
+                    order.get(
+                        "name",
+                        ""
+                    ) +
                     " cancelled order " +
                     order_id +
                     "."
@@ -2616,11 +2887,637 @@ def cancel_order(order_id):
                 order_id
             )
 
-            session["customer_mobile"] = mobile
+            session[
+                "customer_mobile"
+            ] = mobile
 
-            return redirect("/my_orders")
+            return redirect(
+                "/my_orders"
+            )
 
-    return redirect("/my_orders")
+    return redirect(
+        "/my_orders"
+    )
+
+
+# =========================================
+# CONTACT US
+# =========================================
+
+@app.route(
+    "/contact",
+    methods=["GET", "POST"]
+)
+def contact():
+
+
+    error = None
+    success = None
+
+    user = get_logged_in_user()
+
+    name = ""
+    email = ""
+    mobile = ""
+
+    if user:
+
+        name = str(
+            user.get(
+                "name",
+                ""
+            )
+        )
+
+        email = str(
+            user.get(
+                "email",
+                ""
+            )
+        )
+
+        mobile = str(
+            user.get(
+                "mobile",
+                ""
+            )
+        )
+
+    if request.method == "POST":
+
+        name = clean_text(
+            request.form.get(
+                "name",
+                ""
+            ),
+            100
+        )
+
+        email = clean_text(
+            request.form.get(
+                "email",
+                ""
+            ),
+            150
+        ).lower()
+
+        mobile = clean_text(
+            request.form.get(
+                "mobile",
+                ""
+            ),
+            10
+        )
+
+        message = clean_text(
+            request.form.get(
+                "message",
+                ""
+            ),
+            2000
+        )
+
+        if not name or len(name) < 2:
+
+            error = (
+                "Please enter a valid name."
+            )
+
+        elif not is_valid_email(email):
+
+            error = (
+                "Please enter a valid email address."
+            )
+
+        elif (
+            not mobile.isdigit()
+            or len(mobile) != 10
+        ):
+
+            error = (
+                "Please enter a valid "
+                "10-digit mobile number."
+            )
+
+        elif not message or len(message) < 3:
+
+            error = (
+                "Please enter your message."
+            )
+
+        else:
+
+            contacts = load_contacts()
+
+            contact_id = (
+                "contact_" +
+                str(
+                    random.randint(
+                        100000,
+                        999999
+                    )
+                ) +
+                "_" +
+                str(
+                    random.randint(
+                        1000,
+                        9999
+                    )
+                )
+            )
+
+            contact_message = {
+
+                "id": contact_id,
+
+                "name": name,
+
+                "email": email,
+
+                "mobile": mobile,
+
+                "message": message,
+
+                "date": datetime.now().strftime(
+                    "%d-%m-%Y %I:%M %p"
+                ),
+
+                "read": False
+            }
+
+            contacts.insert(
+                0,
+                contact_message
+            )
+
+            contacts = contacts[:200]
+
+            if save_contacts(contacts):
+
+                add_notification(
+                    "contact_message",
+                    "New Contact Message 📞",
+                    (
+                        name +
+                        " sent a new contact message."
+                    ),
+                    ""
+                )
+
+                success = (
+                    "Your message has been sent "
+                    "successfully. 🌸"
+                )
+
+                name = ""
+                email = ""
+                mobile = ""
+
+            else:
+
+                error = (
+                    "Message could not be sent. "
+                    "Please try again."
+                )
+
+    return render_template(
+        "contact.html",
+        user=user,
+        name=name,
+        email=email,
+        mobile=mobile,
+        error=error,
+        success=success,
+        cart_count=get_cart_count(),
+        wishlist_count=get_wishlist_count()
+    )
+# =========================================
+# ABOUT US
+# =========================================
+
+@app.route("/about")
+def about():
+
+    return render_template(
+        "about.html",
+        cart_count=get_cart_count(),
+        wishlist_count=get_wishlist_count()
+    )
+@app.route("/faq")
+def faq():
+
+    return render_template(
+        "faq.html",
+        cart_count=get_cart_count(),
+        wishlist_count=get_wishlist_count()
+    )
+
+# =========================================
+# CUSTOMER SIGNUP
+# =========================================
+
+@app.route(
+    "/signup",
+    methods=["GET", "POST"]
+)
+def signup():
+
+    error = None
+
+    next_page = safe_next_url(
+        request.args.get(
+            "next",
+            ""
+        )
+    )
+
+    if request.method == "POST":
+
+        name = clean_text(
+            request.form.get(
+                "name",
+                ""
+            ),
+            100
+        )
+
+        email = clean_text(
+            request.form.get(
+                "email",
+                ""
+            ),
+            150
+        ).lower()
+
+        mobile = clean_text(
+            request.form.get(
+                "mobile",
+                ""
+            ),
+            10
+        )
+
+        password = request.form.get(
+            "password",
+            ""
+        )
+
+        confirm_password = request.form.get(
+            "confirm_password",
+            ""
+        )
+
+        next_page = safe_next_url(
+            request.form.get(
+                "next",
+                ""
+            )
+        )
+
+        if not name or len(name) < 2:
+
+            error = "Please enter a valid name."
+
+        elif not is_valid_email(email):
+
+            error = "Please enter a valid email address."
+
+        elif (
+            not mobile.isdigit()
+            or len(mobile) != 10
+        ):
+
+            error = (
+                "Please enter a valid "
+                "10-digit mobile number."
+            )
+
+        elif len(password) < 6:
+
+            error = (
+                "Password must be at least "
+                "6 characters."
+            )
+
+        elif password != confirm_password:
+
+            error = "Passwords do not match."
+
+        else:
+
+            users = load_users()
+
+            email_exists = any(
+                str(
+                    user.get(
+                        "email",
+                        ""
+                    )
+                ).lower() == email
+                for user in users
+            )
+
+            if email_exists:
+
+                error = (
+                    "An account with this email "
+                    "already exists."
+                )
+
+            else:
+
+                mobile_exists = any(
+                    str(
+                        user.get(
+                            "mobile",
+                            ""
+                        )
+                    ) == mobile
+                    for user in users
+                )
+
+                if mobile_exists:
+
+                    error = (
+                        "An account with this mobile "
+                        "number already exists."
+                    )
+
+                else:
+
+                    user_id = (
+                        "user_" +
+                        str(
+                            random.randint(
+                                100000,
+                                999999
+                            )
+                        )
+                    )
+
+                    user = {
+
+                        "id": user_id,
+
+                        "name": name,
+
+                        "email": email,
+
+                        "mobile": mobile,
+
+                        "password": (
+                            generate_password_hash(
+                                password
+                            )
+                        ),
+
+                        "created_at": (
+                            datetime.now().strftime(
+                                "%d-%m-%Y %I:%M %p"
+                            )
+                        )
+                    }
+
+                    users.append(user)
+
+                    if save_users(users):
+
+                        session["customer_id"] = user_id
+
+                        session["user"] = {
+                            "id": user_id,
+                            "name": name,
+                            "email": email,
+                            "mobile": mobile
+                        }
+
+                        session[
+                            "customer_mobile"
+                        ] = mobile
+
+                        session.modified = True
+
+                        if next_page:
+                            return redirect(next_page)
+
+                        return redirect("/account")
+
+                    else:
+
+                        error = (
+                            "Account could not be created. "
+                            "Please try again."
+                        )
+
+    return render_template(
+        "signup.html",
+        error=error,
+        next=next_page
+    )
+
+
+# =========================================
+# CUSTOMER LOGIN
+# =========================================
+
+@app.route(
+    "/login",
+    methods=["GET", "POST"]
+)
+def login():
+
+    error = None
+
+    next_page = safe_next_url(
+        request.args.get(
+            "next",
+            ""
+        )
+    )
+
+    if request.method == "POST":
+
+        email = clean_text(
+            request.form.get(
+                "email",
+                ""
+            ),
+            150
+        ).lower()
+
+        password = request.form.get(
+            "password",
+            ""
+        )
+
+        next_page = safe_next_url(
+            request.form.get(
+                "next",
+                ""
+            )
+        )
+
+        if not email:
+
+            error = "Please enter your email."
+
+        elif not password:
+
+            error = "Please enter your password."
+
+        else:
+
+            users = load_users()
+
+            found_user = None
+
+            for user in users:
+
+                if (
+                    str(
+                        user.get(
+                            "email",
+                            ""
+                        )
+                    ).lower() == email
+                ):
+
+                    found_user = user
+
+                    break
+
+            if found_user is None:
+
+                error = (
+                    "Invalid email or password."
+                )
+
+            else:
+
+                stored_password = str(
+                    found_user.get(
+                        "password",
+                        ""
+                    )
+                )
+
+                password_valid = False
+
+                try:
+
+                    password_valid = (
+                        check_password_hash(
+                            stored_password,
+                            password
+                        )
+                    )
+
+                except ValueError:
+
+                    password_valid = False
+
+                if not password_valid:
+
+                    error = (
+                        "Invalid email or password."
+                    )
+
+                else:
+
+                    user_id = str(
+                        found_user.get(
+                            "id",
+                            ""
+                        )
+                    )
+
+                    name = str(
+                        found_user.get(
+                            "name",
+                            ""
+                        )
+                    )
+
+                    mobile = str(
+                        found_user.get(
+                            "mobile",
+                            ""
+                        )
+                    )
+
+                    session["customer_id"] = user_id
+
+                    session["user"] = {
+                        "id": user_id,
+                        "name": name,
+                        "email": email,
+                        "mobile": mobile
+                    }
+
+                    session[
+                        "customer_mobile"
+                    ] = mobile
+
+                    session.modified = True
+
+                    if next_page:
+                        return redirect(next_page)
+
+                    return redirect("/account")
+
+    return render_template(
+        "login.html",
+        error=error,
+        next=next_page
+    )
+
+
+# =========================================
+# CUSTOMER ACCOUNT
+# =========================================
+
+@app.route("/account")
+def account():
+
+    user = session.get("user")
+
+    if not session.get("customer_id"):
+
+        return redirect(
+            "/login?next=/account"
+        )
+
+    return render_template(
+        "account.html",
+        user=user,
+        cart_count=get_cart_count(),
+        wishlist_count=get_wishlist_count()
+    )
+
+
+# =========================================
+# CUSTOMER LOGOUT
+# =========================================
+
+@app.route("/logout")
+def logout():
+
+    session.pop(
+        "customer_id",
+        None
+    )
+
+    session.pop(
+        "user",
+        None
+    )
+
+    session.pop(
+        "customer_mobile",
+        None
+    )
+
+    return redirect("/")
 
 
 # =========================================
@@ -2644,7 +3541,9 @@ def admin_login():
 
         if password == ADMIN_PASSWORD:
 
-            session["admin_logged_in"] = True
+            session[
+                "admin_logged_in"
+            ] = True
 
             return redirect(
                 "/admin/orders"
@@ -2741,20 +3640,25 @@ def admin_orders():
             ):
 
                 if status in valid_statuses:
+
                     order["status"] = status
 
                 if delivery_date:
 
                     try:
 
-                        date_object = datetime.strptime(
-                            delivery_date,
-                            "%Y-%m-%d"
+                        date_object = (
+                            datetime.strptime(
+                                delivery_date,
+                                "%Y-%m-%d"
+                            )
                         )
 
                         minimum_date = (
                             datetime.now()
-                            + timedelta(days=10)
+                            + timedelta(
+                                days=10
+                            )
                         )
 
                         if (
@@ -2762,18 +3666,23 @@ def admin_orders():
                             >= minimum_date.date()
                         ):
 
-                            order["delivery_date"] = (
+                            order[
+                                "delivery_date"
+                            ] = (
                                 date_object.strftime(
                                     "%d-%m-%Y"
                                 )
                             )
 
                     except ValueError:
+
                         pass
 
                 else:
 
-                    order["delivery_date"] = ""
+                    order[
+                        "delivery_date"
+                    ] = ""
 
                 break
 
@@ -2805,7 +3714,10 @@ def admin_orders():
     pending_reviews = [
         review
         for review in reviews
-        if not review.get("approved", True)
+        if not review.get(
+            "approved",
+            True
+        )
     ]
 
     pending_review_count = len(
@@ -2845,10 +3757,16 @@ def approve_review(review_id):
     for review in reviews:
 
         if str(
-            review.get("id", "")
+            review.get(
+                "id",
+                ""
+            )
         ) == str(review_id):
 
-            review["approved"] = True
+            review[
+                "approved"
+            ] = True
+
             break
 
     save_reviews(reviews)
@@ -2882,7 +3800,10 @@ def delete_review(review_id):
         review
         for review in reviews
         if str(
-            review.get("id", "")
+            review.get(
+                "id",
+                ""
+            )
         ) != str(review_id)
     ]
 
@@ -2914,9 +3835,14 @@ def mark_notifications_read():
     notifications = load_notifications()
 
     for notification in notifications:
-        notification["read"] = True
 
-    save_notifications(notifications)
+        notification[
+            "read"
+        ] = True
+
+    save_notifications(
+        notifications
+    )
 
     return redirect(
         "/admin/orders"

@@ -2,47 +2,398 @@
 
 {% block content %}
 
+<style>
+    .confirmation-page {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 25px 15px 50px;
+    }
+
+    .confirmation-success {
+        text-align: center;
+        background: #fff;
+        border-radius: 20px;
+        padding: 35px 20px;
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
+        margin-bottom: 25px;
+    }
+
+    .success-icon {
+        width: 65px;
+        height: 65px;
+        margin: 0 auto 15px;
+        border-radius: 50%;
+        background: #e9f8ef;
+        color: #27ae60;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 34px;
+        font-weight: bold;
+    }
+
+    .confirmation-success h1 {
+        margin: 0 0 8px;
+        color: #333;
+        font-size: 30px;
+    }
+
+    .confirmation-success > p {
+        margin: 0;
+        color: #777;
+        font-size: 15px;
+    }
+
+    .confirmation-order-id {
+        display: inline-flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-top: 20px;
+        padding: 12px 25px;
+        border-radius: 12px;
+        background: #fff7f9;
+        border: 1px solid #ffd9e6;
+    }
+
+    .confirmation-order-id span {
+        color: #999;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+
+    .confirmation-order-id strong {
+        color: #ff5f98;
+        font-size: 19px;
+    }
+
+    .confirmation-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .confirmation-card {
+        background: #fff;
+        border-radius: 18px;
+        padding: 25px;
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.07);
+    }
+
+    .confirmation-card h2 {
+        margin: 0 0 20px;
+        color: #333;
+        font-size: 19px;
+    }
+
+    .confirmation-info {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .confirmation-info > div {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .confirmation-info span {
+        color: #999;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .confirmation-info strong {
+        color: #444;
+        font-size: 14px;
+        line-height: 1.5;
+        word-break: break-word;
+    }
+
+    .confirmation-items {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .confirmation-item {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        padding: 13px;
+        border: 1px solid #eee;
+        border-radius: 12px;
+    }
+
+    .confirmation-item > div {
+        min-width: 0;
+    }
+
+    .confirmation-item strong {
+        color: #333;
+        font-size: 14px;
+    }
+
+    .confirmation-item > strong {
+        white-space: nowrap;
+    }
+
+    .confirmation-item span {
+        display: block;
+        margin-top: 5px;
+        color: #888;
+        font-size: 12px;
+    }
+
+    .confirmation-item-details {
+        margin-top: 5px;
+        color: #777;
+        font-size: 12px;
+    }
+
+    .confirmation-divider {
+        height: 1px;
+        background: #eee;
+        margin: 18px 0;
+    }
+
+    .confirmation-total {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        padding: 7px 0;
+        color: #666;
+        font-size: 14px;
+    }
+
+    .confirmation-total strong {
+        color: #333;
+    }
+
+    .confirmation-final-total {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        padding: 15px;
+        background: #fff7f9;
+        border-radius: 12px;
+        color: #333;
+        font-size: 17px;
+        font-weight: 600;
+    }
+
+    .confirmation-final-total strong {
+        color: #ff5f98;
+        font-size: 21px;
+    }
+
+    .confirmation-delivery {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        margin-top: 20px;
+        padding: 22px;
+        background: #fff;
+        border: 1px solid #ffd9e6;
+        border-radius: 18px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .confirmation-delivery-icon {
+        width: 52px;
+        height: 52px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff0f5;
+        border-radius: 50%;
+        font-size: 25px;
+    }
+
+    .confirmation-delivery h3 {
+        margin: 0 0 5px;
+        color: #333;
+        font-size: 17px;
+    }
+
+    .confirmation-delivery p {
+        margin: 0;
+        color: #777;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .confirmation-status {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        margin-top: 20px;
+        padding: 18px 22px;
+        background: #fff;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .confirmation-status span {
+        color: #666;
+        font-size: 14px;
+    }
+
+    .confirmation-status strong {
+        padding: 8px 16px;
+        border-radius: 30px;
+        background: #fff3cd;
+        color: #856404;
+        font-size: 13px;
+    }
+
+    .confirmation-actions {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-top: 25px;
+    }
+
+    .confirmation-actions a {
+        text-decoration: none;
+    }
+
+    .confirmation-actions button {
+        min-width: 190px;
+        padding: 13px 20px;
+        border: none;
+        border-radius: 10px;
+        background: #ff6fa5;
+        color: white;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .confirmation-actions button:hover {
+        transform: translateY(-1px);
+        opacity: 0.95;
+    }
+
+    .confirmation-actions .confirmation-home-button {
+        background: #333;
+    }
+
+    @media (max-width: 700px) {
+
+        .confirmation-page {
+            padding: 18px 12px 40px;
+        }
+
+        .confirmation-success {
+            padding: 28px 16px;
+        }
+
+        .confirmation-success h1 {
+            font-size: 24px;
+        }
+
+        .confirmation-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .confirmation-card {
+            padding: 20px;
+        }
+
+        .confirmation-delivery {
+            align-items: flex-start;
+            padding: 18px;
+        }
+
+        .confirmation-status {
+            padding: 16px;
+        }
+
+        .confirmation-actions {
+            flex-direction: column;
+        }
+
+        .confirmation-actions a,
+        .confirmation-actions button {
+            width: 100%;
+        }
+
+        .confirmation-actions button {
+            box-sizing: border-box;
+        }
+    }
+</style>
+
 <section class="confirmation-page">
 
-    <div class="confirmation-success">
-        <div class="success-icon">✓</div>
+    <!-- SUCCESS -->
 
-        <h1>Order Placed Successfully! 🌸</h1>
+    <div class="confirmation-success">
+
+        <div class="success-icon">
+            ✓
+        </div>
+
+        <h1>
+            Order Placed Successfully! 🌸
+        </h1>
 
         <p>
             Thank you for shopping with Handmade Blooms.
         </p>
 
         <div class="confirmation-order-id">
-            <span>Order ID</span>
-            <strong>{{ order["order_id"] }}</strong>
+
+            <span>
+                ORDER ID
+            </span>
+
+            <strong>
+                {{ order["order_id"] }}
+            </strong>
+
         </div>
+
     </div>
 
 
     <div class="confirmation-layout">
 
-        <!-- CUSTOMER DETAILS -->
+        <!-- DELIVERY DETAILS -->
 
         <div class="confirmation-card">
 
-            <h2>📦 Delivery Details</h2>
+            <h2>
+                📦 Delivery Details
+            </h2>
 
             <div class="confirmation-info">
 
                 <div>
                     <span>Name</span>
-                    <strong>{{ order["name"] }}</strong>
+                    <strong>
+                        {{ order["name"] }}
+                    </strong>
                 </div>
 
                 <div>
                     <span>Email</span>
-                    <strong>{{ order["email"] }}</strong>
+                    <strong>
+                        {{ order["email"] }}
+                    </strong>
                 </div>
 
                 <div>
                     <span>Mobile</span>
-                    <strong>{{ order["mobile"] }}</strong>
+                    <strong>
+                        {{ order["mobile"] }}
+                    </strong>
                 </div>
 
                 <div>
@@ -64,7 +415,9 @@
 
         <div class="confirmation-card">
 
-            <h2>🛒 Order Summary</h2>
+            <h2>
+                🛒 Order Summary
+            </h2>
 
             <div class="confirmation-items">
 
@@ -73,11 +426,31 @@
                 <div class="confirmation-item">
 
                     <div>
-                        <strong>{{ item["name"] }}</strong>
+
+                        <strong>
+                            {{ item["name"] }}
+                        </strong>
 
                         <span>
                             ₹{{ item["price"] }} × {{ item["quantity"] }}
                         </span>
+
+                        {% if item.get("color") %}
+
+                        <div class="confirmation-item-details">
+                            🎨 Color: {{ item["color"] }}
+                        </div>
+
+                        {% endif %}
+
+                        {% if item.get("size") %}
+
+                        <div class="confirmation-item-details">
+                            📏 Size: {{ item["size"] }}
+                        </div>
+
+                        {% endif %}
+
                     </div>
 
                     <strong>
@@ -93,20 +466,57 @@
             <div class="confirmation-divider"></div>
 
             <div class="confirmation-total">
-                <span>Product Total</span>
-                <strong>₹{{ order["product_total"] }}</strong>
+
+                <span>
+                    Product Total
+                </span>
+
+                <strong>
+                    ₹{{ order["product_total"] }}
+                </strong>
+
             </div>
 
+            {% if order.get("discount", 0) > 0 %}
+
             <div class="confirmation-total">
-                <span>Delivery Charge</span>
-                <strong>₹{{ order["delivery_charge"] }}</strong>
+
+                <span>
+                    Discount
+                </span>
+
+                <strong>
+                    -₹{{ order["discount"] }}
+                </strong>
+
+            </div>
+
+            {% endif %}
+
+            <div class="confirmation-total">
+
+                <span>
+                    Delivery Charge
+                </span>
+
+                <strong>
+                    ₹{{ order["delivery_charge"] }}
+                </strong>
+
             </div>
 
             <div class="confirmation-divider"></div>
 
             <div class="confirmation-final-total">
-                <span>Total Amount</span>
-                <strong>₹{{ order["total"] }}</strong>
+
+                <span>
+                    Total Amount
+                </span>
+
+                <strong>
+                    ₹{{ order["final_total"] }}
+                </strong>
+
             </div>
 
         </div>
@@ -123,22 +533,38 @@
         </div>
 
         <div>
-            <h3>Delivery within 10 days</h3>
+
+            {% if order.get("delivery_date") %}
+
+            <h3>
+                Expected Delivery: {{ order["delivery_date"] }}
+            </h3>
+
+            {% else %}
+
+            <h3>
+                Delivery within 10 days
+            </h3>
+
+            {% endif %}
 
             <p>
-                Your order will be delivered within 10 days.
-                We will process your order as soon as possible.
+                Your order will be processed as soon as possible
+                and delivered within 10 days.
             </p>
+
         </div>
 
     </div>
 
 
-    <!-- STATUS -->
+    <!-- ORDER STATUS -->
 
     <div class="confirmation-status">
 
-        <span>Order Status</span>
+        <span>
+            Order Status
+        </span>
 
         <strong>
             {{ order["status"] }}
@@ -147,7 +573,7 @@
     </div>
 
 
-    <!-- BUTTONS -->
+    <!-- ACTION BUTTONS -->
 
     <div class="confirmation-actions">
 
@@ -158,7 +584,10 @@
         </a>
 
         <a href="/">
-            <button type="button" class="confirmation-home-button">
+            <button
+                type="button"
+                class="confirmation-home-button"
+            >
                 Continue Shopping 🌷
             </button>
         </a>

@@ -2,169 +2,125 @@
 
 {% block content %}
 
+<style>
+
+.account-page {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+.account-card {
+    background: white;
+    border-radius: 22px;
+    padding: 35px 25px;
+    text-align: center;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    border: 1px solid #f4dce5;
+}
+
+.account-icon {
+    font-size: 55px;
+    margin-bottom: 15px;
+}
+
+.account-card h1 {
+    margin: 0;
+    color: #333;
+}
+
+.account-card p {
+    color: #777;
+    margin: 10px 0 25px;
+}
+
+.account-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.account-button {
+    display: inline-block;
+    padding: 12px 22px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.orders-button {
+    background: #ff6fa5;
+    color: white;
+}
+
+.track-button {
+    background: #fff0f5;
+    color: #e84f88;
+    border: 1px solid #ffc5d8;
+}
+
+@media (max-width: 600px) {
+
+    .account-page {
+        margin: 25px auto;
+        padding: 15px;
+    }
+
+    .account-card {
+        padding: 30px 18px;
+    }
+
+    .account-buttons {
+        flex-direction: column;
+    }
+
+    .account-button {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+}
+
+</style>
+
+
 <div class="account-page">
 
-```
-<div class="account-header">
+    <div class="account-card">
 
-    <h1>👤 My Account</h1>
-
-    <p>
-        Welcome to your Handmade Blooms account 🌸
-    </p>
-
-</div>
-
-<div class="account-card">
-
-    <div class="account-icon">
-        👤
-    </div>
-
-    <h2>
-        {{ user["name"] }}
-    </h2>
-
-    <div class="customer-id-box">
-
-        <span>
-            Customer ID
-        </span>
-
-        <strong>
-            {{ user["customer_id"] }}
-        </strong>
-
-    </div>
-
-
-    <!-- ============================= -->
-    <!-- ORDER SUMMARY -->
-    <!-- ============================= -->
-
-    <div class="order-summary">
-
-        <div class="order-summary-box">
-
-            <span class="summary-number">
-                {{ orders|length }}
-            </span>
-
-            <span class="summary-label">
-                Total Orders
-            </span>
-
+        <div class="account-icon">
+            👤
         </div>
 
-        <div class="order-summary-box">
+        <h1>
+            My Account
+        </h1>
 
-            <span class="summary-number">
-                {{ orders|selectattr("status", "equalto", "Delivered")|list|length }}
-            </span>
+        <p>
+            Welcome to Handmade Blooms 🌸
+        </p>
 
-            <span class="summary-label">
-                Delivered
-            </span>
+        <div class="account-buttons">
 
-        </div>
-
-        <div class="order-summary-box">
-
-            <span class="summary-number">
-                {{ orders|selectattr("status", "equalto", "Pending")|list|length }}
-            </span>
-
-            <span class="summary-label">
-                Pending
-            </span>
-
-        </div>
-
-    </div>
-
-
-    <!-- ============================= -->
-    <!-- ACCOUNT DETAILS -->
-    <!-- ============================= -->
-
-    <div class="account-details">
-
-        <div class="account-detail-row">
-
-            <span>
-                Name
-            </span>
-
-            <strong>
-                {{ user["name"] }}
-            </strong>
-
-        </div>
-
-        <div class="account-detail-row">
-
-            <span>
-                Email
-            </span>
-
-            <strong>
-                {{ user["email"] }}
-            </strong>
-
-        </div>
-
-        <div class="account-detail-row">
-
-            <span>
-                Mobile
-            </span>
-
-            <strong>
-                {{ user["mobile"] }}
-            </strong>
-
-        </div>
-
-        <div class="account-detail-row">
-
-            <span>
-                Account Created
-            </span>
-
-            <strong>
-                {{ user["created_at"] }}
-            </strong>
-
-        </div>
-
-    </div>
-
-
-    <!-- ============================= -->
-    <!-- ACTION BUTTONS -->
-    <!-- ============================= -->
-
-    <div class="account-actions">
-
-        <a href="/my_orders">
-            <button type="button">
-                📦 My Orders
-            </button>
-        </a>
-
-        <a href="/logout">
-            <button
-                type="button"
-                class="logout-button"
+            <a
+                href="/my_orders"
+                class="account-button orders-button"
             >
-                🚪 Logout
-            </button>
-        </a>
+                📦 My Orders
+            </a>
+
+            <a
+                href="/track_order"
+                class="account-button track-button"
+            >
+                🚚 Track Order
+            </a>
+
+        </div>
 
     </div>
-
-</div>
-```
 
 </div>
 

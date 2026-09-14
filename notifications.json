@@ -1,5 +1,122 @@
 [
     {
+        "id": "notification_741134_7383",
+        "type": "new_order",
+        "title": "New Paid Order Received 🛒",
+        "message": "New paid order HB163324 placed by Aarti Rawat. Total: ₹120",
+        "order_id": "HB163324",
+        "date": "14-09-2026 11:43 AM",
+        "read": true
+    },
+    {
+        "id": "notification_956681_9071",
+        "type": "new_order",
+        "title": "New Paid Order Received 🛒",
+        "message": "New paid order HB848718 placed by naman. Total: ₹120",
+        "order_id": "HB848718",
+        "date": "14-09-2026 09:21 AM",
+        "read": true
+    },
+    {
+        "id": "notification_648706_8414",
+        "type": "new_review",
+        "title": "New Review Received ⭐",
+        "message": "naman submitted a review for Rose.",
+        "order_id": "HB446161",
+        "date": "13-09-2026 04:24 PM",
+        "read": true
+    },
+    {
+        "id": "notification_828321_1595",
+        "type": "new_order",
+        "title": "New Order Received 🛒",
+        "message": "New order HB446161 placed by naman. Total: ₹249",
+        "order_id": "HB446161",
+        "date": "13-09-2026 04:15 PM",
+        "read": true
+    },
+    {
+        "id": "notification_280822_5389",
+        "type": "new_order",
+        "title": "New Order Received 🛒",
+        "message": "New order HB393776 placed by naman. Total: ₹249",
+        "order_id": "HB393776",
+        "date": "13-09-2026 04:09 PM",
+        "read": true
+    },
+    {
+        "id": "notification_848472_4131",
+        "type": "cancelled_order",
+        "title": "Order Cancelled ❌",
+        "message": "Customer naman cancelled order HB375379.",
+        "order_id": "HB375379",
+        "date": "10-09-2026 07:03 PM",
+        "read": true
+    },
+    {
+        "id": "notification_761215_5645",
+        "type": "cancelled_order",
+        "title": "Order Cancelled ❌",
+        "message": "Customer naman cancelled order HB532491.",
+        "order_id": "HB532491",
+        "date": "10-09-2026 07:03 PM",
+        "read": true
+    },
+    {
+        "id": "notification_471606_3219",
+        "type": "new_order",
+        "title": "New Order Received 🛒",
+        "message": "New order HB532491 placed by naman. Total: ₹150",
+        "order_id": "HB532491",
+        "date": "10-09-2026 07:02 PM",
+        "read": true
+    },
+    {
+        "id": "notification_825678_8996",
+        "type": "new_order",
+        "title": "New Order Received 🛒",
+        "message": "New order HB372389 placed by naman. Total: ₹259",
+        "order_id": "HB372389",
+        "date": "09-09-2026 10:57 PM",
+        "read": true
+    },
+    {
+        "id": "notification_878244_2659",
+        "type": "new_order",
+        "title": "New Order Received 🛒",
+        "message": "New order HB375379 placed by naman. Total: ₹120",
+        "order_id": "HB375379",
+        "date": "09-09-2026 10:56 PM",
+        "read": true
+    },
+    {
+        "id": "notification_595701_6237",
+        "type": "contact_message",
+        "title": "New Contact Message 📞",
+        "message": "naman sent a new contact message.",
+        "order_id": "",
+        "date": "09-09-2026 08:47 PM",
+        "read": true
+    },
+    {
+        "id": "notification_398528_3024",
+        "type": "new_order",
+        "title": "New Order Received 🛒",
+        "message": "New order HB330342 placed by naman. Total: ₹120",
+        "order_id": "HB330342",
+        "date": "09-09-2026 04:25 PM",
+        "read": true
+    },
+    {
+        "id": "notification_426605_1544",
+        "type": "new_order",
+        "title": "New Order Received 🛒",
+        "message": "New order HB859955 placed by naman. Total: ₹150",
+        "order_id": "HB859955",
+        "date": "08-09-2026 10:22 PM",
+        "read": true
+    },
+    {
         "id": "notification_889175_9816",
         "type": "new_review",
         "title": "New Review Received ⭐",

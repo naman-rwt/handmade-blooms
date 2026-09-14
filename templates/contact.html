@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+
+.contact-page {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+.contact-card {
+    background: white;
+    border-radius: 22px;
+    padding: 35px 30px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    border: 1px solid #f4dce5;
+}
+
+.contact-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.contact-icon {
+    font-size: 55px;
+    margin-bottom: 10px;
+}
+
+.contact-header h1 {
+    margin: 0;
+    color: #333;
+}
+
+.contact-header p {
+    color: #777;
+    margin-top: 10px;
+}
+
+.contact-form {
+    max-width: 650px;
+    margin: auto;
+}
+
+.contact-form label {
+    display: block;
+    margin-top: 16px;
+    margin-bottom: 7px;
+    font-weight: bold;
+    color: #444;
+}
+
+.contact-form input,
+.contact-form textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 13px 15px;
+    border: 1px solid #e5cbd5;
+    border-radius: 10px;
+    font-size: 15px;
+    outline: none;
+    font-family: Arial, sans-serif;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+    border-color: #ff6fa5;
+    box-shadow: 0 0 0 3px rgba(255, 111, 165, 0.12);
+}
+
+.contact-form textarea {
+    min-height: 140px;
+    resize: vertical;
+}
+
+.contact-form button {
+    width: 100%;
+    margin-top: 22px;
+    padding: 14px;
+    border: none;
+    border-radius: 25px;
+    background: #ff6fa5;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.contact-form button:hover {
+    background: #ff4f91;
+    transform: translateY(-1px);
+}
+
+.contact-info {
+    margin-top: 30px;
+    padding-top: 25px;
+    border-top: 1px solid #f1dce4;
+    text-align: center;
+}
+
+.contact-info p {
+    margin: 8px 0;
+    color: #666;
+}
+
+.success-message {
+    background: #eafaf0;
+    color: #207a43;
+    border: 1px solid #bde8ca;
+    padding: 12px 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.error-message {
+    background: #fff0f0;
+    color: #c0392b;
+    border: 1px solid #f2b8b2;
+    padding: 12px 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+@media (max-width: 600px) {
+
+    .contact-page {
+        margin: 25px auto;
+        padding: 15px;
+    }
+
+    .contact-card {
+        padding: 28px 18px;
+    }
+
+    .contact-icon {
+        font-size: 48px;
+    }
+
+}
+
+</style>
+
+
+<div class="contact-page">
+
+    <div class="contact-card">
+
+        <div class="contact-header">
+
+            <div class="contact-icon">
+                📞
+            </div>
+
+            <h1>
+                Contact Us
+            </h1>
+
+            <p>
+                Handmade Blooms se kisi bhi help ke liye contact karein 🌸
+            </p>
+
+        </div>
+
+
+        {% if success %}
+
+        <div class="success-message">
+            {{ success }}
+        </div>
+
+        {% endif %}
+
+
+        {% if error %}
+
+        <div class="error-message">
+            {{ error }}
+        </div>
+
+        {% endif %}
+
+
+        <form
+            method="POST"
+            action="/contact"
+            class="contact-form"
+        >
+
+            <label>
+                Name
+            </label>
+
+            <input
+                type="text"
+                name="name"
+                placeholder="Enter your name"
+                value="{{ user.name if user else '' }}"
+                required
+            >
+
+
+            <label>
+                Email
+            </label>
+
+            <input
+                type="email"
+                name="email"
+                placeholder="Enter your email"
+                value="{{ user.email if user else '' }}"
+                required
+            >
+
+
+            <label>
+                Mobile Number
+            </label>
+
+            <input
+                type="text"
+                name="mobile"
+                placeholder="10-digit mobile number"
+                maxlength="10"
+                inputmode="numeric"
+                value="{{ user.mobile if user else '' }}"
+                required
+            >
+
+
+            <label>
+                Message
+            </label>
+
+            <textarea
+                name="message"
+                placeholder="Write your message here..."
+                required
+            ></textarea>
+
+
+            <button type="submit">
+                Send Message
+            </button>
+
+        </form>
+
+
+        <div class="contact-info">
+
+            <p>
+                📍 Pali, Rajasthan
+            </p>
+
+            <p>
+                🌸 Handmade Blooms Customer Support
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

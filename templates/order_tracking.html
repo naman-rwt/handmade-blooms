@@ -2,30 +2,479 @@
 
 {% block content %}
 
+<style>
+    .tracking-page {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 25px 15px 50px;
+    }
+
+    .tracking-header {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .tracking-header h1 {
+        margin: 0 0 8px;
+        color: #333;
+        font-size: 32px;
+    }
+
+    .tracking-header p {
+        margin: 0;
+        color: #777;
+        font-size: 15px;
+    }
+
+    .tracking-search-card,
+    .tracking-order-card {
+        background: #fff;
+        border-radius: 18px;
+        box-shadow: 0 6px 25px rgba(0,0,0,.08);
+    }
+
+    .tracking-search-card {
+        max-width: 650px;
+        margin: 0 auto 30px;
+        padding: 25px;
+    }
+
+    .tracking-form-group {
+        margin-bottom: 18px;
+    }
+
+    .tracking-form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #444;
+    }
+
+    .tracking-form-group input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 13px 15px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        font-size: 15px;
+        outline: none;
+    }
+
+    .tracking-form-group input:focus {
+        border-color: #ff6fa5;
+        box-shadow: 0 0 0 3px rgba(255,111,165,.12);
+    }
+
+    .track-button {
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 10px;
+        background: #ff6fa5;
+        color: white;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .tracking-order-card {
+        padding: 28px;
+    }
+
+    .tracking-order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .tracking-label {
+        display: block;
+        font-size: 11px;
+        letter-spacing: 1px;
+        color: #999;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .tracking-order-header h2 {
+        margin: 0;
+        color: #333;
+        font-size: 24px;
+    }
+
+    .tracking-status {
+        padding: 9px 16px;
+        border-radius: 30px;
+        font-size: 13px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .tracking-status.pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .tracking-status.processing {
+        background: #e8f1ff;
+        color: #2458a6;
+    }
+
+    .tracking-status.shipped {
+        background: #e8f7ff;
+        color: #087b9f;
+    }
+
+    .tracking-status.delivered {
+        background: #e8f8ee;
+        color: #23834b;
+    }
+
+    .tracking-status.cancelled {
+        background: #ffe8e8;
+        color: #c0392b;
+    }
+
+    .tracking-divider {
+        height: 1px;
+        background: #eee;
+        margin: 25px 0;
+    }
+
+    .tracking-section h3 {
+        margin: 0 0 18px;
+        color: #333;
+        font-size: 19px;
+    }
+
+    /* STATUS TIMELINE */
+
+    .status-box {
+        background: #fff8fb;
+        border: 1px solid #ffd9e6;
+        border-radius: 16px;
+        padding: 25px 15px;
+    }
+
+    .tracking-progress {
+        display: flex;
+        align-items: flex-start;
+        width: 100%;
+    }
+
+    .tracking-step {
+        width: 110px;
+        flex-shrink: 0;
+        text-align: center;
+        color: #aaa;
+    }
+
+    .tracking-step.active {
+        color: #ff5f98;
+        font-weight: 700;
+    }
+
+    .tracking-circle {
+        width: 44px;
+        height: 44px;
+        margin: 0 auto 9px;
+        border-radius: 50%;
+        background: #eee;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 17px;
+        font-weight: 700;
+    }
+
+    .tracking-step.active .tracking-circle {
+        background: #ff6fa5;
+        color: white;
+        box-shadow: 0 5px 14px rgba(255,111,165,.25);
+    }
+
+    .tracking-step span {
+        display: block;
+        font-size: 12px;
+    }
+
+    .tracking-line {
+        height: 4px;
+        flex: 1;
+        min-width: 20px;
+        background: #eee;
+        margin-top: 20px;
+        border-radius: 10px;
+    }
+
+    .tracking-line.active {
+        background: #ff6fa5;
+    }
+
+    /* DELIVERY */
+
+    .delivery-tracking-box {
+        background: #fff7f9;
+        border: 1px solid #ffd9e6;
+        border-radius: 14px;
+        padding: 20px;
+    }
+
+    .delivery-main {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .delivery-main span {
+        color: #666;
+        font-size: 14px;
+    }
+
+    .delivery-main strong {
+        color: #333;
+        font-size: 18px;
+    }
+
+    /* ITEMS */
+
+    .tracking-items {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .tracking-item {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 17px;
+        border: 1px solid #eee;
+        border-radius: 14px;
+    }
+
+    .tracking-item-info {
+        min-width: 0;
+    }
+
+    .tracking-item-info h4 {
+        margin: 0 0 8px;
+        color: #333;
+        font-size: 16px;
+    }
+
+    .tracking-item-info p {
+        margin: 5px 0;
+        color: #777;
+        font-size: 13px;
+    }
+
+    .tracking-item-price {
+        text-align: right;
+        min-width: 125px;
+    }
+
+    .tracking-item-price span {
+        display: block;
+        color: #888;
+        font-size: 12px;
+        margin-bottom: 5px;
+    }
+
+    .tracking-item-price strong {
+        color: #333;
+        font-size: 16px;
+    }
+
+    .tracking-special-details {
+        background: #fff7f9;
+        border-left: 3px solid #ff6fa5;
+        padding: 8px 10px;
+        margin-top: 9px;
+        border-radius: 5px;
+    }
+
+    .tracking-special-details strong {
+        color: #d94f82;
+        font-size: 12px;
+    }
+
+    .tracking-special-details p {
+        margin: 4px 0 0;
+    }
+
+    /* PAYMENT */
+
+    .tracking-payment {
+        background: #fafafa;
+        border-radius: 14px;
+        padding: 5px 17px;
+    }
+
+    .tracking-payment > div {
+        display: flex;
+        justify-content: space-between;
+        padding: 13px 0;
+        border-bottom: 1px solid #eee;
+        color: #666;
+        font-size: 14px;
+    }
+
+    .tracking-payment > div:last-child {
+        border-bottom: none;
+    }
+
+    .tracking-payment strong {
+        color: #333;
+    }
+
+    .tracking-final-total {
+        font-size: 17px !important;
+        color: #333 !important;
+    }
+
+    .tracking-final-total strong {
+        color: #ff5f98;
+        font-size: 20px;
+    }
+
+    /* CANCEL */
+
+    .tracking-cancel-section {
+        background: #fff8f8;
+        border: 1px solid #ffdada;
+        border-radius: 14px;
+        padding: 20px;
+    }
+
+    .tracking-cancel-section h3 {
+        margin-bottom: 7px;
+    }
+
+    .tracking-cancel-section p {
+        color: #777;
+        font-size: 14px;
+        margin: 0 0 15px;
+    }
+
+    .cancel-order-button {
+        border: none;
+        border-radius: 9px;
+        padding: 11px 18px;
+        background: #e74c3c;
+        color: white;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .tracking-note {
+        background: #fff9ed;
+        border: 1px solid #f6dfad;
+        border-radius: 14px;
+        padding: 17px 20px;
+    }
+
+    .tracking-note strong {
+        color: #805d16;
+        display: block;
+        margin-bottom: 6px;
+    }
+
+    .tracking-note p {
+        margin: 0;
+        color: #777;
+        font-size: 14px;
+    }
+
+    .cancelled-order-box {
+        text-align: center;
+        background: #fff5f5;
+        border: 1px solid #ffd7d7;
+        border-radius: 15px;
+        padding: 30px 20px;
+    }
+
+    .cancelled-icon {
+        font-size: 38px;
+        margin-bottom: 8px;
+    }
+
+    .cancelled-order-box h3 {
+        margin: 0 0 6px;
+        color: #c0392b;
+    }
+
+    .cancelled-order-box p {
+        margin: 0;
+        color: #777;
+    }
+
+    @media (max-width: 650px) {
+
+        .tracking-page {
+            padding: 18px 12px 40px;
+        }
+
+        .tracking-header h1 {
+            font-size: 25px;
+        }
+
+        .tracking-search-card,
+        .tracking-order-card {
+            padding: 18px;
+        }
+
+        .tracking-order-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .tracking-status {
+            align-self: flex-start;
+        }
+
+        .status-box {
+            overflow-x: auto;
+        }
+
+        .tracking-progress {
+            min-width: 500px;
+        }
+
+        .tracking-item {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .tracking-item-price {
+            text-align: left;
+        }
+
+        .delivery-main {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 7px;
+        }
+    }
+</style>
+
 <div class="tracking-page">
 
     <div class="tracking-header">
-
-        <h1>
-            Track Your Order 📦
-        </h1>
-
+        <h1>Track Your Order 📦</h1>
         <p>
-            Enter your Order ID and mobile number
-            to check your order status.
+            Enter your Order ID and mobile number to check your order status.
         </p>
-
     </div>
 
-    <div class="card tracking-search-card">
+    <div class="tracking-search-card">
 
         <form action="/track_order" method="POST">
 
             <div class="tracking-form-group">
-
-                <label>
-                    Order ID
-                </label>
+                <label>Order ID</label>
 
                 <input
                     type="text"
@@ -33,14 +482,10 @@
                     placeholder="Example: HB123456"
                     required
                 >
-
             </div>
 
             <div class="tracking-form-group">
-
-                <label>
-                    Mobile Number
-                </label>
+                <label>Mobile Number</label>
 
                 <input
                     type="tel"
@@ -52,13 +497,9 @@
                     inputmode="numeric"
                     required
                 >
-
             </div>
 
-            <button
-                type="submit"
-                class="track-button"
-            >
+            <button type="submit" class="track-button">
                 Track Order 🔍
             </button>
 
@@ -73,15 +514,11 @@
         <div class="tracking-order-header">
 
             <div>
-
-                <span class="tracking-label">
-                    ORDER ID
-                </span>
+                <span class="tracking-label">ORDER ID</span>
 
                 <h2>
                     {{ order["order_id"] }}
                 </h2>
-
             </div>
 
             <div class="tracking-status
@@ -97,9 +534,7 @@
                     cancelled
                 {% endif %}
             ">
-
                 {{ order["status"] }}
-
             </div>
 
         </div>
@@ -110,91 +545,93 @@
 
         <div class="tracking-section">
 
-            <h3>
-                Order Progress 🚚
-            </h3>
+            <h3>📦 Order Status</h3>
 
-            <div class="tracking-progress">
+            <div class="status-box">
 
-                <div class="tracking-step
-                    {% if order["status"] in ["Pending", "Processing", "Shipped", "Delivered"] %}
-                        active
-                    {% endif %}
-                ">
+                <div class="tracking-progress">
 
-                    <div class="tracking-circle">
-                        ✓
+                    <div class="tracking-step
+                        {% if order["status"] in ["Pending", "Processing", "Shipped", "Delivered"] %}
+                            active
+                        {% endif %}
+                    ">
+
+                        <div class="tracking-circle">
+                            ✓
+                        </div>
+
+                        <span>
+                            Order Placed
+                        </span>
+
                     </div>
 
-                    <span>
-                        Order Placed
-                    </span>
+                    <div class="tracking-line
+                        {% if order["status"] in ["Processing", "Shipped", "Delivered"] %}
+                            active
+                        {% endif %}
+                    "></div>
 
-                </div>
+                    <div class="tracking-step
+                        {% if order["status"] in ["Processing", "Shipped", "Delivered"] %}
+                            active
+                        {% endif %}
+                    ">
 
-                <div class="tracking-line
-                    {% if order["status"] in ["Processing", "Shipped", "Delivered"] %}
-                        active
-                    {% endif %}
-                "></div>
+                        <div class="tracking-circle">
+                            ✓
+                        </div>
 
-                <div class="tracking-step
-                    {% if order["status"] in ["Processing", "Shipped", "Delivered"] %}
-                        active
-                    {% endif %}
-                ">
+                        <span>
+                            Processing
+                        </span>
 
-                    <div class="tracking-circle">
-                        ✓
                     </div>
 
-                    <span>
-                        Processing
-                    </span>
+                    <div class="tracking-line
+                        {% if order["status"] in ["Shipped", "Delivered"] %}
+                            active
+                        {% endif %}
+                    "></div>
 
-                </div>
+                    <div class="tracking-step
+                        {% if order["status"] in ["Shipped", "Delivered"] %}
+                            active
+                        {% endif %}
+                    ">
 
-                <div class="tracking-line
-                    {% if order["status"] in ["Shipped", "Delivered"] %}
-                        active
-                    {% endif %}
-                "></div>
+                        <div class="tracking-circle">
+                            🚚
+                        </div>
 
-                <div class="tracking-step
-                    {% if order["status"] in ["Shipped", "Delivered"] %}
-                        active
-                    {% endif %}
-                ">
+                        <span>
+                            Shipped
+                        </span>
 
-                    <div class="tracking-circle">
-                        🚚
                     </div>
 
-                    <span>
-                        Shipped
-                    </span>
+                    <div class="tracking-line
+                        {% if order["status"] == "Delivered" %}
+                            active
+                        {% endif %}
+                    "></div>
 
-                </div>
+                    <div class="tracking-step
+                        {% if order["status"] == "Delivered" %}
+                            active
+                        {% endif %}
+                    ">
 
-                <div class="tracking-line
-                    {% if order["status"] == "Delivered" %}
-                        active
-                    {% endif %}
-                "></div>
+                        <div class="tracking-circle">
+                            ✓
+                        </div>
 
-                <div class="tracking-step
-                    {% if order["status"] == "Delivered" %}
-                        active
-                    {% endif %}
-                ">
+                        <span>
+                            Delivered
+                        </span>
 
-                    <div class="tracking-circle">
-                        ✓
                     </div>
-
-                    <span>
-                        Delivered
-                    </span>
 
                 </div>
 
@@ -226,9 +663,7 @@
 
         <div class="tracking-section">
 
-            <h3>
-                📅 Delivery Information
-            </h3>
+            <h3>📅 Delivery Information</h3>
 
             <div class="delivery-tracking-box">
 
@@ -255,7 +690,7 @@
                     </span>
 
                     <strong>
-                        10 Days
+                        Within 10 Days
                     </strong>
 
                 </div>
@@ -270,9 +705,7 @@
 
         <div class="tracking-section">
 
-            <h3>
-                🛍️ Order Items
-            </h3>
+            <h3>🛍️ Order Items</h3>
 
             <div class="tracking-items">
 
@@ -293,6 +726,24 @@
                             </strong>
                         </p>
 
+                        {% if item.get("color") %}
+
+                        <p>
+                            <strong>🎨 Color:</strong>
+                            {{ item["color"] }}
+                        </p>
+
+                        {% endif %}
+
+                        {% if item.get("size") %}
+
+                        <p>
+                            <strong>📏 Size:</strong>
+                            {{ item["size"] }}
+                        </p>
+
+                        {% endif %}
+
                         {% if item.get("message") %}
 
                         <div class="tracking-special-details">
@@ -312,7 +763,6 @@
                         {% if item.get("flower_name") %}
 
                         <p>
-
                             <strong>
                                 🌺 Requested Flower:
                             </strong>
@@ -326,7 +776,6 @@
                         {% if item.get("demand_details") %}
 
                         <p>
-
                             <strong>
                                 ✨ Customer Demand:
                             </strong>
@@ -363,9 +812,7 @@
 
         <div class="tracking-section">
 
-            <h3>
-                💰 Payment Summary
-            </h3>
+            <h3>💰 Payment Summary</h3>
 
             <div class="tracking-payment">
 
@@ -380,6 +827,22 @@
                     </strong>
 
                 </div>
+
+                {% if order.get("discount", 0) > 0 %}
+
+                <div>
+
+                    <span>
+                        Discount
+                    </span>
+
+                    <strong>
+                        -₹{{ order["discount"] }}
+                    </strong>
+
+                </div>
+
+                {% endif %}
 
                 <div>
 

@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div
+    id="payment-data"
+    data-key="{{ razorpay_key_id }}"
+    data-amount="{{ amount }}"
+    data-order-id="{{ razorpay_order_id }}"
+    data-name="{{ customer_name }}"
+    data-email="{{ customer_email }}"
+    data-mobile="{{ customer_mobile }}"
+    data-success-url="{{ url_for('payment_success') }}"
+    data-failed-url="{{ url_for('payment_failed') }}"
+    style="max-width:650px;margin:40px auto;padding:28px;background:white;border-radius:18px;box-shadow:0 5px 20px rgba(0,0,0,0.08);text-align:center;"
+>
+    <h1 style="color:#e75480;margin-bottom:10px;">
+        Complete Your Payment 💳
+    </h1>
+
+    <p style="color:#666;">
+        Your order is ready. Click below to pay securely with Razorpay.
+    </p>
+
+    <div style="margin:25px 0;padding:18px;background:#fff5f8;border-radius:14px;">
+        <div style="font-size:15px;color:#666;">
+            Amount to Pay
+        </div>
+        <div style="font-size:32px;font-weight:bold;color:#e75480;">
+            ₹{{ amount_rupees }}
+        </div>
+    </div>
+
+    <button
+        id="pay-btn"
+        type="button"
+        style="border:0;background:#e75480;color:white;padding:14px 32px;border-radius:10px;font-size:17px;font-weight:bold;cursor:pointer;"
+    >
+        Pay Now ₹{{ amount_rupees }}
+    </button>
+
+    <div
+        id="payment-error"
+        style="display:none;margin-top:20px;padding:15px;background:#fff1f1;color:#c62828;border-radius:10px;text-align:left;line-height:1.5;"
+    ></div>
+
+    <p style="font-size:13px;color:#888;margin-top:18px;">
+        In Test Mode, Razorpay uses a simulated payment page. No real money is deducted.
+    </p>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+const paymentData = document.getElementById("payment-data");
+const payButton = document.getElementById("pay-btn");
+const errorBox = document.getElementById("payment-error");
+
+const razorpayKey = paymentData.dataset.key;
+const amount = Number(paymentData.dataset.amount);
+const razorpayOrderId = paymentData.dataset.orderId;
+
+const customerName = paymentData.dataset.name;
+const customerEmail = paymentData.dataset.email;
+const customerMobile = paymentData.dataset.mobile;
+
+const successUrl = paymentData.dataset.successUrl;
+
+function openRazorpay() {
+    errorBox.style.display = "none";
+    errorBox.innerHTML = "";
+    payButton.disabled = true;
+    payButton.style.opacity = "0.7";
+
+    const options = {
+        key: razorpayKey,
+        amount: amount,
+        currency: "INR",
+        name: "Handmade Blooms",
+        description: "Handmade Blooms Order",
+        order_id: razorpayOrderId,
+        prefill: {
+            name: customerName,
+            email: customerEmail,
+            contact: customerMobile
+        },
+        theme: {
+            color: "#e75480"
+        },
+        handler: function(response) {
+            const form = document.createElement("form");
+            form.method = "POST";
+            form.action = successUrl;
+
+            const paymentId = document.createElement("input");
+            paymentId.type = "hidden";
+            paymentId.name = "razorpay_payment_id";
+            paymentId.value = response.razorpay_payment_id;
+            form.appendChild(paymentId);
+
+            const orderId = document.createElement("input");
+            orderId.type = "hidden";
+            orderId.name = "razorpay_order_id";
+            orderId.value = response.razorpay_order_id;
+            form.appendChild(orderId);
+
+            const signature = document.createElement("input");
+            signature.type = "hidden";
+            signature.name = "razorpay_signature";
+            signature.value = response.razorpay_signature;
+            form.appendChild(signature);
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+    };
+
+    const rzp = new Razorpay(options);
+
+    rzp.on("payment.failed", function(response) {
+        payButton.disabled = false;
+        payButton.style.opacity = "1";
+
+        const error = response.error || {};
+        const reason = error.description || error.reason || "Razorpay payment was not completed.";
+        const code = error.code ? " (Code: " + error.code + ")" : "";
+
+        errorBox.innerHTML =
+            "<strong>Payment was not completed.</strong><br>" +
+            reason + code +
+            "<br><br>Click <strong>Pay Now</strong> to try again.";
+        errorBox.style.display = "block";
+    });
+
+    rzp.on("payment.cancelled", function() {
+        payButton.disabled = false;
+        payButton.style.opacity = "1";
+    });
+
+    rzp.open();
+}
+
+payButton.addEventListener("click", function(event) {
+    event.preventDefault();
+    openRazorpay();
+});
+
+openRazorpay();
+</script>
+
+{% endblock %}

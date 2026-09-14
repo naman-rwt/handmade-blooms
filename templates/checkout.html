@@ -4,7 +4,6 @@
 
 <div class="checkout-page">
 
-```
 <div class="checkout-header">
 
     <h1>
@@ -20,10 +19,6 @@
 
 <div class="checkout-layout">
 
-
-    <!-- ============================= -->
-    <!-- CUSTOMER DETAILS -->
-    <!-- ============================= -->
 
     <div class="card checkout-details">
 
@@ -132,6 +127,7 @@
                     <input
                         type="text"
                         name="city"
+                        id="city"
                         placeholder="Enter city"
                         required
                     >
@@ -185,11 +181,12 @@
     </div>
 
 
-    <!-- ============================= -->
-    <!-- ORDER SUMMARY -->
-    <!-- ============================= -->
-
-    <div class="card checkout-summary">
+    <div
+        class="card checkout-summary"
+        id="checkout-summary"
+        data-product-total="{{ product_total }}"
+        data-discount="{{ discount }}"
+    >
 
         <h2>
             Order Summary 🛒
@@ -241,10 +238,6 @@
 
         </div>
 
-
-        <!-- ============================= -->
-        <!-- PRIVATE COUPON CODE -->
-        <!-- ============================= -->
 
         <div class="coupon-section">
 
@@ -355,9 +348,9 @@
                 Delivery
             </span>
 
-            <span class="delivery-at-checkout">
-                ₹0 Pali / ₹99 Outside Pali
-            </span>
+            <strong id="delivery-charge">
+                ₹99
+            </strong>
 
         </div>
 
@@ -368,11 +361,11 @@
         <div class="checkout-final-total">
 
             <span>
-                Total Before Delivery
+                Total
             </span>
 
-            <strong>
-                ₹{{ product_total - discount }}
+            <strong id="checkout-final-total">
+                ₹{{ product_total - discount + 99 }}
             </strong>
 
         </div>
@@ -414,8 +407,103 @@
     </div>
 
 </div>
-```
 
 </div>
+
+
+<script>
+
+function updateCheckoutTotal() {
+
+    const cityInput =
+        document.getElementById("city");
+
+    const deliveryElement =
+        document.getElementById("delivery-charge");
+
+    const totalElement =
+        document.getElementById("checkout-final-total");
+
+    const summaryElement =
+        document.getElementById("checkout-summary");
+
+
+    if (
+        !cityInput ||
+        !deliveryElement ||
+        !totalElement ||
+        !summaryElement
+    ) {
+        return;
+    }
+
+
+    const city =
+        cityInput.value.trim().toLowerCase();
+
+
+    const productTotal =
+        Number(
+            summaryElement.dataset.productTotal
+        );
+
+
+    const discount =
+        Number(
+            summaryElement.dataset.discount
+        );
+
+
+    let deliveryCharge = 99;
+
+
+    if (city === "pali") {
+
+        deliveryCharge = 0;
+
+    }
+
+
+    const finalTotal =
+        productTotal -
+        discount +
+        deliveryCharge;
+
+
+    deliveryElement.innerText =
+        "₹" + deliveryCharge;
+
+
+    totalElement.innerText =
+        "₹" + Math.max(finalTotal, 0);
+
+}
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        const cityInput =
+            document.getElementById("city");
+
+
+        if (cityInput) {
+
+            cityInput.addEventListener(
+                "input",
+                updateCheckoutTotal
+            );
+
+
+            updateCheckoutTotal();
+
+        }
+
+    }
+);
+
+</script>
+
 
 {% endblock %}

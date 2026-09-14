@@ -35,6 +35,148 @@
 }
 
 
+/* =========================================
+   SIZE SELECTOR
+   ========================================= */
+
+.size-selector-box {
+    margin: 20px 0;
+    padding: 16px;
+    background: #fff7fa;
+    border: 1px solid #f0d9e1;
+    border-radius: 12px;
+}
+
+.size-selector-title {
+    margin-bottom: 12px;
+    color: #444;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.size-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+}
+
+.size-option {
+    border: 1px solid #e3cbd4;
+    background: white;
+    color: #555;
+    padding: 9px 16px;
+    border-radius: 9px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.size-option:hover {
+    border-color: #ff6fa5;
+    color: #ff4f91;
+}
+
+.size-option.selected {
+    background: #ff6fa5;
+    border-color: #ff6fa5;
+    color: white;
+}
+
+.size-unavailable {
+    color: #999;
+    font-size: 12px;
+    margin-top: 10px;
+}
+
+
+/* =========================================
+   COLOR SELECTOR
+   ========================================= */
+
+.color-selector-box {
+    margin: 20px 0;
+    padding: 16px;
+    background: #fff7fa;
+    border: 1px solid #f0d9e1;
+    border-radius: 12px;
+}
+
+.color-selector-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.color-selector-title strong {
+    color: #444;
+    font-size: 15px;
+}
+
+.selected-color {
+    color: #ff4f91;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.color-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.color-option {
+    border: 1px solid #e3cbd4;
+    background: white;
+    color: #555;
+    padding: 9px 13px;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.color-option:hover {
+    border-color: #ff6fa5;
+    color: #ff4f91;
+}
+
+.color-option.selected {
+    background: #ff6fa5;
+    border-color: #ff6fa5;
+    color: white;
+}
+
+.color-request-note {
+    margin: 10px 0 0;
+    color: #888;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.custom-color-input {
+    display: none;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 10px;
+    padding: 11px 13px;
+    border: 1px solid #e5c4d0;
+    border-radius: 9px;
+    outline: none;
+    font-size: 14px;
+    background: white;
+}
+
+.custom-color-input:focus {
+    border-color: #ff6fa5;
+}
+
+
+/* =========================================
+   REVIEWS
+   ========================================= */
+
 .reviews-section {
     width: 100%;
     max-width: 1200px;
@@ -247,11 +389,17 @@
     font-size: 14px;
 }
 
+
+/* =========================================
+   MOBILE
+   ========================================= */
+
 @media (max-width: 850px) {
 
     .review-layout {
         grid-template-columns: 1fr;
     }
+
 }
 
 @media (max-width: 600px) {
@@ -278,455 +426,1160 @@
     .review-date {
         white-space: normal;
     }
+
+    .color-options {
+        gap: 7px;
+    }
+
+    .color-option {
+        padding: 8px 11px;
+        font-size: 12px;
+    }
+
+    .size-options {
+        gap: 7px;
+    }
+
+    .size-option {
+        padding: 8px 13px;
+    }
+
 }
 
 </style>
 
 
-<section class="product-detail">
+<section
+    class="product-detail"
+    data-product-id="{{ product.id }}"
+>
 
-    <div class="product-detail-image">
+<div class="product-detail-image">
 
-        <img
-            src="{{ url_for(
-                'static',
-                filename='images/' + product.image
-            ) }}"
-            alt="{{ product.name }}"
-        >
+    <img
+        src="{{ url_for(
+            'static',
+            filename='images/' + product.image
+        ) }}"
+        alt="{{ product.name }}"
+    >
 
+</div>
+
+
+<div class="product-detail-info">
+
+    <h1>
+        {{ product.name }}
+    </h1>
+
+
+    <!-- PRICE -->
+
+    <div
+        class="product-price"
+        id="product-price"
+    >
+        ₹{{ product.price }}
     </div>
 
 
-    <div class="product-detail-info">
+    <!-- RATING -->
 
-        <h1>
-            {{ product.name }}
-        </h1>
+    <div class="product-rating-summary">
 
+        {% if review_count > 0 %}
 
-        <div class="product-price">
-            ₹{{ product.price }}
-        </div>
+            <span class="rating-stars">
 
+                {% for i in range(1, 6) %}
 
-        <div class="product-rating-summary">
+                    {% if i <= average_rating %}
+                        ★
+                    {% else %}
+                        ☆
+                    {% endif %}
 
-            {% if review_count > 0 %}
+                {% endfor %}
 
-                <span class="rating-stars">
-
-                    {% for i in range(1, 6) %}
-
-                        {% if i <= average_rating %}
-                            ★
-                        {% else %}
-                            ☆
-                        {% endif %}
-
-                    {% endfor %}
-
-                </span>
-
-                <span class="rating-number">
-                    {{ average_rating }}/5
-                </span>
-
-                <span class="rating-count">
-                    ({{ review_count }} reviews)
-                </span>
-
-            {% else %}
-
-                <span class="no-rating">
-                    No ratings yet
-                </span>
-
-            {% endif %}
-
-        </div>
-
-
-        <p class="product-description">
-            {{ product.description }}
-        </p>
-
-
-        <div class="product-detail-quantity">
-
-            <button
-                type="button"
-                onclick="decreaseQuantity()"
-            >
-                −
-            </button>
-
-            <span id="quantity">
-                1
             </span>
 
-            <button
-                type="button"
-                onclick="increaseQuantity()"
-            >
-                +
-            </button>
+            <span class="rating-number">
+                {{ average_rating }}/5
+            </span>
 
-        </div>
-
-
-        <a
-            id="add-link"
-            href="/add_to_cart/{{ product.id }}?quantity=1"
-        >
-
-            <button
-                type="button"
-                class="detail-cart-button"
-            >
-                Add To Cart 🛒
-            </button>
-
-        </a>
-
-
-        {% if product.id in wishlist %}
-
-        <a
-            href="/remove_from_wishlist/{{ product.id }}"
-            class="detail-wishlist-button wishlist-added"
-        >
-            Remove From Wishlist ❤️
-        </a>
+            <span class="rating-count">
+                ({{ review_count }} reviews)
+            </span>
 
         {% else %}
 
-        <a
-            href="/add_to_wishlist/{{ product.id }}"
-            class="detail-wishlist-button"
-        >
-            Add To Wishlist ❤️
-        </a>
+            <span class="no-rating">
+                No ratings yet
+            </span>
 
         {% endif %}
 
+    </div>
 
-        <a
-            href="/"
-            class="back-home"
-        >
-            ← Continue Shopping
-        </a>
+
+    <!-- DESCRIPTION -->
+
+    <p class="product-description">
+        {{ product.description }}
+    </p>
+
+
+    <!-- SIZE SELECTOR -->
+
+    {% if product.sizes %}
+
+    <div class="size-selector-box">
+
+        <div class="size-selector-title">
+            Select Size 📏
+        </div>
+
+        <div class="size-options">
+
+            {% for size, price in product.sizes.items() %}
+
+            <button
+                type="button"
+                class="size-option"
+                data-size="{{ size }}"
+                data-price="{{ price }}"
+            >
+                {{ size }} — ₹{{ price }}
+            </button>
+
+            {% endfor %}
+
+        </div>
+
+        <div class="size-unavailable">
+            Only the sizes shown above are available for this flower.
+        </div>
 
     </div>
+
+    {% endif %}
+
+
+    <!-- COLOR SELECTOR -->
+
+    {% if product.id != "lavender" and product.id != "sunflower" %}
+
+    <div class="color-selector-box">
+
+        <div class="color-selector-title">
+
+            <strong>
+                Select Your Color 🌸
+            </strong>
+
+            <span
+                id="selected-color"
+                class="selected-color"
+            >
+                No color selected
+            </span>
+
+        </div>
+
+
+        <div class="color-options">
+
+            <button type="button" class="color-option" data-color="Pink">
+                Pink
+            </button>
+
+            <button type="button" class="color-option" data-color="Red">
+                Red
+            </button>
+
+            <button type="button" class="color-option" data-color="Maroon">
+                Maroon
+            </button>
+
+            <button type="button" class="color-option" data-color="Lavender">
+                Lavender
+            </button>
+
+            <button type="button" class="color-option" data-color="Cyan">
+                Cyan
+            </button>
+
+            <button type="button" class="color-option" data-color="Yellow">
+                Yellow
+            </button>
+
+            <button type="button" class="color-option" data-color="Orange">
+                Orange
+            </button>
+
+            <button type="button" class="color-option" data-color="Purple">
+                Purple
+            </button>
+
+            <button type="button" class="color-option" data-color="Brown">
+                Brown
+            </button>
+
+            <button type="button" class="color-option" data-color="Dark Green">
+                Dark Green
+            </button>
+
+            <button type="button" class="color-option" data-color="Light Green">
+                Light Green
+            </button>
+
+            <button type="button" class="color-option" data-color="White">
+                White
+            </button>
+
+            <button
+                type="button"
+                class="color-option"
+                id="other-color-button"
+            >
+                ＋ Other
+            </button>
+
+        </div>
+
+
+        <input
+            type="text"
+            id="custom-color"
+            class="custom-color-input"
+            placeholder="Enter your desired color"
+            maxlength="50"
+        >
+
+
+        <p class="color-request-note">
+            Photo will stay the same. Your selected color will be added to the order so we know which color you want.
+        </p>
+
+    </div>
+
+    {% endif %}
+
+
+    <!-- QUANTITY -->
+
+    <div class="product-detail-quantity">
+
+        <button
+            type="button"
+            id="decrease-quantity"
+        >
+            −
+        </button>
+
+        <span id="quantity">
+            1
+        </span>
+
+        <button
+            type="button"
+            id="increase-quantity"
+        >
+            +
+        </button>
+
+    </div>
+
+
+    <!-- ADD TO CART -->
+
+    <a
+        id="add-link"
+        href="#"
+    >
+
+        <button
+            type="button"
+            class="detail-cart-button"
+            id="add-to-cart-button"
+        >
+            Add To Cart 🛒
+        </button>
+
+    </a>
+
+
+    <!-- WISHLIST -->
+
+    {% if product.id in wishlist %}
+
+    <a
+        href="/remove_from_wishlist/{{ product.id }}"
+        class="detail-wishlist-button wishlist-added"
+    >
+        Remove From Wishlist ❤️
+    </a>
+
+    {% else %}
+
+    <a
+        href="/add_to_wishlist/{{ product.id }}"
+        class="detail-wishlist-button"
+    >
+        Add To Wishlist ❤️
+    </a>
+
+    {% endif %}
+
+
+    <a
+        href="/"
+        class="back-home"
+    >
+        ← Continue Shopping
+    </a>
+
+</div>
 
 </section>
 
 
+<!-- =========================================
+     REVIEWS
+     ========================================= -->
+
 <section class="reviews-section">
 
-    <div class="reviews-header">
+<div class="reviews-header">
 
-        <h2>
-            Customer Reviews ⭐
-        </h2>
+    <h2>
+        Customer Reviews ⭐
+    </h2>
 
-        <p>
-            Share your experience with this flower.
-        </p>
+    <p>
+        Share your experience with this flower.
+    </p>
+
+</div>
+
+
+<div class="review-layout">
+
+
+    <div class="card review-form-card">
+
+        <h3>
+            Write a Review ✍️
+        </h3>
+
+
+        <form
+            action="/add_review/{{ product.id }}"
+            method="POST"
+            class="review-form"
+        >
+
+            <label>
+                Your Name
+            </label>
+
+            <input
+                type="text"
+                name="name"
+                placeholder="Enter your name"
+                maxlength="100"
+                required
+            >
+
+
+            <label>
+                Order ID
+            </label>
+
+            <input
+                type="text"
+                name="order_id"
+                placeholder="Example: HB123456"
+                maxlength="50"
+                required
+            >
+
+
+            <label>
+                Mobile Number
+            </label>
+
+            <input
+                type="tel"
+                name="mobile"
+                placeholder="10-digit mobile number"
+                maxlength="10"
+                pattern="[0-9]{10}"
+                required
+            >
+
+
+            <p class="review-help">
+                Enter the Order ID and mobile number
+                used while purchasing this flower.
+                This helps us verify your purchase.
+            </p>
+
+
+            <label>
+                Rating
+            </label>
+
+
+            <div class="star-selector">
+
+                <input
+                    type="radio"
+                    id="star5"
+                    name="rating"
+                    value="5"
+                    required
+                >
+
+                <label for="star5">
+                    ★
+                </label>
+
+
+                <input
+                    type="radio"
+                    id="star4"
+                    name="rating"
+                    value="4"
+                >
+
+                <label for="star4">
+                    ★
+                </label>
+
+
+                <input
+                    type="radio"
+                    id="star3"
+                    name="rating"
+                    value="3"
+                >
+
+                <label for="star3">
+                    ★
+                </label>
+
+
+                <input
+                    type="radio"
+                    id="star2"
+                    name="rating"
+                    value="2"
+                >
+
+                <label for="star2">
+                    ★
+                </label>
+
+
+                <input
+                    type="radio"
+                    id="star1"
+                    name="rating"
+                    value="1"
+                >
+
+                <label for="star1">
+                    ★
+                </label>
+
+            </div>
+
+
+            <label>
+                Your Review
+            </label>
+
+            <textarea
+                name="review"
+                placeholder="Write your review..."
+                maxlength="1000"
+                required
+            ></textarea>
+
+
+            <button
+                type="submit"
+                class="submit-review-button"
+            >
+                Submit Review ⭐
+            </button>
+
+        </form>
 
     </div>
 
 
-    <div class="review-layout">
+    <div class="review-list">
+
+        {% if reviews %}
+
+            {% for review in reviews %}
+
+            <div class="review-card">
+
+                <div class="review-top">
+
+                    <div>
+
+                        <strong class="review-name">
+                            {{ review.name }}
+                        </strong>
 
 
-        <!-- REVIEW FORM -->
+                        <div class="review-stars">
 
-        <div class="card review-form-card">
+                            {% for i in range(1, 6) %}
 
-            <h3>
-                Write a Review ✍️
-            </h3>
+                                {% if i <= review.rating %}
+                                    ★
+                                {% else %}
+                                    ☆
+                                {% endif %}
 
-
-            <form
-                action="/add_review/{{ product.id }}"
-                method="POST"
-                class="review-form"
-            >
-
-                <label>
-                    Your Name
-                </label>
-
-                <input
-                    type="text"
-                    name="name"
-                    placeholder="Enter your name"
-                    maxlength="100"
-                    required
-                >
-
-
-                <label>
-                    Order ID
-                </label>
-
-                <input
-                    type="text"
-                    name="order_id"
-                    placeholder="Example: HB123456"
-                    maxlength="50"
-                    required
-                >
-
-
-                <label>
-                    Mobile Number
-                </label>
-
-                <input
-                    type="tel"
-                    name="mobile"
-                    placeholder="10-digit mobile number"
-                    maxlength="10"
-                    pattern="[0-9]{10}"
-                    required
-                >
-
-                <p class="review-help">
-                    Enter the Order ID and mobile number
-                    used while purchasing this flower.
-                    This helps us verify your purchase.
-                </p>
-
-
-                <label>
-                    Rating
-                </label>
-
-
-                <div class="star-selector">
-
-                    <input
-                        type="radio"
-                        id="star5"
-                        name="rating"
-                        value="5"
-                        required
-                    >
-
-                    <label for="star5">
-                        ★
-                    </label>
-
-
-                    <input
-                        type="radio"
-                        id="star4"
-                        name="rating"
-                        value="4"
-                    >
-
-                    <label for="star4">
-                        ★
-                    </label>
-
-
-                    <input
-                        type="radio"
-                        id="star3"
-                        name="rating"
-                        value="3"
-                    >
-
-                    <label for="star3">
-                        ★
-                    </label>
-
-
-                    <input
-                        type="radio"
-                        id="star2"
-                        name="rating"
-                        value="2"
-                    >
-
-                    <label for="star2">
-                        ★
-                    </label>
-
-
-                    <input
-                        type="radio"
-                        id="star1"
-                        name="rating"
-                        value="1"
-                    >
-
-                    <label for="star1">
-                        ★
-                    </label>
-
-                </div>
-
-
-                <label>
-                    Your Review
-                </label>
-
-                <textarea
-                    name="review"
-                    placeholder="Write your review..."
-                    maxlength="1000"
-                    required
-                ></textarea>
-
-
-                <button
-                    type="submit"
-                    class="submit-review-button"
-                >
-                    Submit Review ⭐
-                </button>
-
-            </form>
-
-        </div>
-
-
-        <!-- REVIEW LIST -->
-
-        <div class="review-list">
-
-            {% if reviews %}
-
-                {% for review in reviews %}
-
-                <div class="review-card">
-
-                    <div class="review-top">
-
-                        <div>
-
-                            <strong class="review-name">
-                                {{ review.name }}
-                            </strong>
-
-
-                            <div class="review-stars">
-
-                                {% for i in range(1, 6) %}
-
-                                    {% if i <= review.rating %}
-                                        ★
-                                    {% else %}
-                                        ☆
-                                    {% endif %}
-
-                                {% endfor %}
-
-                            </div>
-
-
-                            {% if review.get("verified_purchase", false) %}
-
-                            <span class="verified-badge">
-                                ✓ Verified Purchase
-                            </span>
-
-                            {% endif %}
+                            {% endfor %}
 
                         </div>
 
 
-                        <span class="review-date">
-                            {{ review.date }}
+                        {% if review.get("verified_purchase", false) %}
+
+                        <span class="verified-badge">
+                            ✓ Verified Purchase
                         </span>
 
+                        {% endif %}
+
                     </div>
 
 
-                    <p class="review-text">
-                        {{ review.review }}
-                    </p>
+                    <span class="review-date">
+                        {{ review.date }}
+                    </span>
 
                 </div>
 
-                {% endfor %}
 
-            {% else %}
+                <p class="review-text">
+                    {{ review.review }}
+                </p>
 
-                <div class="no-reviews">
+            </div>
 
-                    <div class="no-reviews-icon">
-                        ⭐
-                    </div>
+            {% endfor %}
 
-                    <h3>
-                        No Reviews Yet
-                    </h3>
+        {% else %}
 
-                    <p>
-                        Be the first person to review this flower.
-                    </p>
+            <div class="no-reviews">
 
+                <div class="no-reviews-icon">
+                    ⭐
                 </div>
 
-            {% endif %}
+                <h3>
+                    No Reviews Yet
+                </h3>
 
-        </div>
+                <p>
+                    Be the first person to review this flower.
+                </p>
+
+            </div>
+
+        {% endif %}
 
     </div>
+
+</div>
 
 </section>
 
 
 <script>
 
+/* =========================================
+   PRODUCT INFORMATION
+   ========================================= */
+
+const productDetail =
+    document.querySelector(".product-detail");
+
+let productId = "";
+
+if (productDetail) {
+
+    productId =
+        productDetail.getAttribute(
+            "data-product-id"
+        ) || "";
+
+}
+
+
+const productRequiresColor =
+    productId !== "lavender" &&
+    productId !== "sunflower";
+
+
+/* =========================================
+   VARIABLES
+   ========================================= */
+
 let quantity = 1;
+let selectedSize = "";
+let selectedColor = "";
 
 
-function increaseQuantity() {
+/* =========================================
+   SIZE BUTTONS
+   ========================================= */
 
-    if (quantity < 99) {
+const sizeButtons =
+    document.querySelectorAll(
+        ".size-option"
+    );
 
-        quantity++;
 
-        document.getElementById(
-            "quantity"
-        ).innerText = quantity;
+sizeButtons.forEach(function(button) {
 
-        updateAddLink();
-    }
+    button.addEventListener(
+        "click",
+        function() {
+
+            selectedSize =
+                button.getAttribute(
+                    "data-size"
+                ) || "";
+
+
+            const price =
+                button.getAttribute(
+                    "data-price"
+                ) || "0";
+
+
+            sizeButtons.forEach(
+                function(item) {
+
+                    item.classList.remove(
+                        "selected"
+                    );
+
+                }
+            );
+
+
+            button.classList.add(
+                "selected"
+            );
+
+
+            const productPrice =
+                document.getElementById(
+                    "product-price"
+                );
+
+
+            if (productPrice) {
+
+                productPrice.innerText =
+                    "₹" + price;
+
+            }
+
+
+            updateAddLink();
+
+        }
+    );
+
+});
+
+
+/* =========================================
+   COLOR BUTTONS
+   ========================================= */
+
+const colorButtons =
+    document.querySelectorAll(
+        ".color-option"
+    );
+
+
+colorButtons.forEach(function(button) {
+
+    button.addEventListener(
+        "click",
+        function() {
+
+            const color =
+                button.getAttribute(
+                    "data-color"
+                );
+
+
+            if (!color) {
+
+                return;
+
+            }
+
+
+            selectedColor =
+                color;
+
+
+            colorButtons.forEach(
+                function(item) {
+
+                    item.classList.remove(
+                        "selected"
+                    );
+
+                }
+            );
+
+
+            button.classList.add(
+                "selected"
+            );
+
+
+            const selectedColorElement =
+                document.getElementById(
+                    "selected-color"
+                );
+
+
+            if (selectedColorElement) {
+
+                selectedColorElement.innerText =
+                    "Selected: " + color;
+
+            }
+
+
+            const customColor =
+                document.getElementById(
+                    "custom-color"
+                );
+
+
+            if (customColor) {
+
+                customColor.style.display =
+                    "none";
+
+                customColor.value = "";
+
+            }
+
+
+            updateAddLink();
+
+        }
+    );
+
+});
+
+
+/* =========================================
+   OTHER COLOR
+   ========================================= */
+
+const otherColorButton =
+    document.getElementById(
+        "other-color-button"
+    );
+
+
+if (otherColorButton) {
+
+    otherColorButton.addEventListener(
+        "click",
+        function() {
+
+            colorButtons.forEach(
+                function(item) {
+
+                    item.classList.remove(
+                        "selected"
+                    );
+
+                }
+            );
+
+
+            selectedColor = "";
+
+
+            const customColor =
+                document.getElementById(
+                    "custom-color"
+                );
+
+
+            if (customColor) {
+
+                customColor.style.display =
+                    "block";
+
+                customColor.focus();
+
+            }
+
+
+            const selectedColorElement =
+                document.getElementById(
+                    "selected-color"
+                );
+
+
+            if (selectedColorElement) {
+
+                selectedColorElement.innerText =
+                    "Enter your color";
+
+            }
+
+
+            updateAddLink();
+
+        }
+    );
+
 }
 
 
-function decreaseQuantity() {
+/* =========================================
+   CUSTOM COLOR
+   ========================================= */
 
-    if (quantity > 1) {
+const customColorInput =
+    document.getElementById(
+        "custom-color"
+    );
 
-        quantity--;
 
-        document.getElementById(
-            "quantity"
-        ).innerText = quantity;
+if (customColorInput) {
 
-        updateAddLink();
-    }
+    customColorInput.addEventListener(
+        "input",
+        function() {
+
+            selectedColor =
+                customColorInput.value.trim();
+
+
+            const selectedColorElement =
+                document.getElementById(
+                    "selected-color"
+                );
+
+
+            if (selectedColorElement) {
+
+                if (selectedColor) {
+
+                    selectedColorElement.innerText =
+                        "Selected: " +
+                        selectedColor;
+
+                } else {
+
+                    selectedColorElement.innerText =
+                        "Enter your color";
+
+                }
+
+            }
+
+
+            updateAddLink();
+
+        }
+    );
+
 }
 
+
+/* =========================================
+   INCREASE QUANTITY
+   ========================================= */
+
+const increaseButton =
+    document.getElementById(
+        "increase-quantity"
+    );
+
+
+if (increaseButton) {
+
+    increaseButton.addEventListener(
+        "click",
+        function() {
+
+            if (quantity < 99) {
+
+                quantity++;
+
+                const quantityElement =
+                    document.getElementById(
+                        "quantity"
+                    );
+
+
+                if (quantityElement) {
+
+                    quantityElement.innerText =
+                        quantity;
+
+                }
+
+
+                updateAddLink();
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   DECREASE QUANTITY
+   ========================================= */
+
+const decreaseButton =
+    document.getElementById(
+        "decrease-quantity"
+    );
+
+
+if (decreaseButton) {
+
+    decreaseButton.addEventListener(
+        "click",
+        function() {
+
+            if (quantity > 1) {
+
+                quantity--;
+
+                const quantityElement =
+                    document.getElementById(
+                        "quantity"
+                    );
+
+
+                if (quantityElement) {
+
+                    quantityElement.innerText =
+                        quantity;
+
+                }
+
+
+                updateAddLink();
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   UPDATE ADD TO CART LINK
+   ========================================= */
 
 function updateAddLink() {
 
-    document.getElementById(
-        "add-link"
-    ).href =
-        "/add_to_cart/{{ product.id }}?quantity=" +
-        quantity;
+    if (!productId) {
+
+        return;
+
+    }
+
+
+    let link =
+        "/add_to_cart/" +
+        encodeURIComponent(productId) +
+        "?quantity=" +
+        encodeURIComponent(quantity);
+
+
+    if (selectedSize) {
+
+        link +=
+            "&size=" +
+            encodeURIComponent(
+                selectedSize
+            );
+
+    }
+
+
+    if (
+        productRequiresColor &&
+        selectedColor
+    ) {
+
+        link +=
+            "&color=" +
+            encodeURIComponent(
+                selectedColor
+            );
+
+    }
+
+
+    const addLink =
+        document.getElementById(
+            "add-link"
+        );
+
+
+    if (addLink) {
+
+        addLink.href =
+            link;
+
+    }
+
 }
 
+
+/* =========================================
+   ADD TO CART
+   ========================================= */
+
+const addToCartButton =
+    document.getElementById(
+        "add-to-cart-button"
+    );
+
+
+if (addToCartButton) {
+
+    addToCartButton.addEventListener(
+        "click",
+        function(event) {
+
+            event.preventDefault();
+
+
+            if (
+                productRequiresColor &&
+                !selectedColor
+            ) {
+
+                alert(
+                    "Please select a color before adding this flower to cart."
+                );
+
+                return;
+
+            }
+
+
+            updateAddLink();
+
+
+            const addLink =
+                document.getElementById(
+                    "add-link"
+                );
+
+
+            if (
+                addLink &&
+                addLink.href &&
+                addLink.href !== "#"
+            ) {
+
+                window.location.href =
+                    addLink.href;
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   PAGE LOAD
+   ========================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        const firstSizeButton =
+            document.querySelector(
+                ".size-option"
+            );
+
+
+        if (firstSizeButton) {
+
+            selectedSize =
+                firstSizeButton.getAttribute(
+                    "data-size"
+                ) || "";
+
+
+            const defaultPrice =
+                firstSizeButton.getAttribute(
+                    "data-price"
+                );
+
+
+            firstSizeButton.classList.add(
+                "selected"
+            );
+
+
+            const productPrice =
+                document.getElementById(
+                    "product-price"
+                );
+
+
+            if (
+                productPrice &&
+                defaultPrice
+            ) {
+
+                productPrice.innerText =
+                    "₹" + defaultPrice;
+
+            }
+
+        }
+
+
+        updateAddLink();
+
+    }
+);
+
 </script>
+
 
 {% endblock %}
