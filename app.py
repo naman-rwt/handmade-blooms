@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session , url_for
+from flask import Flask, render_template, request, redirect, session, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 import json
 import os
@@ -6,6 +6,8 @@ import random
 import re
 from datetime import datetime, timedelta
 import razorpay
+import hmac
+import hashlib
 
 
 app = Flask(__name__)
@@ -17,17 +19,18 @@ NOTIFICATIONS_FILE = "notifications.json"
 REVIEWS_FILE = "reviews.json"
 USERS_FILE = "users.json"
 CONTACTS_FILE = "contacts.json"
-
-ADMIN_PASSWORD = "HBadmin123"
-
-# =========================================
-# RAZORPAY TEST MODE
-# =========================================
-# Paste your Razorpay TEST Key ID and TEST Key Secret here.
-# Never share the Key Secret with anyone.
+PENDING_PAYMENTS_FILE = "pending_payments.json"
 
 RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID")
 RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
+WEBHOOK_SECRET = os.getenv("RAZORPAY_WEBHOOK_SECRET", "")
+
+ADMIN_PASSWORD = "HBadmin123"
+
+
+# =========================================
+# RAZORPAY
+# =========================================
 
 razorpay_client = razorpay.Client(
     auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET)
@@ -387,6 +390,80 @@ def save_orders(orders):
     except OSError:
 
         return False
+
+
+# =========================================
+# PENDING PAYMENT FILE FUNCTIONS
+# =========================================
+
+def load_pending_payments():
+
+    if not os.path.exists(PENDING_PAYMENTS_FILE):
+        return {}
+
+    try:
+
+        with open(
+            PENDING_PAYMENTS_FILE,
+            "r",
+            encoding="utf-8"
+        ) as file:
+
+            data = json.load(file)
+
+            if isinstance(data, dict):
+                return data
+
+            return {}
+
+    except (
+        json.JSONDecodeError,
+        FileNotFoundError,
+        OSError
+    ):
+
+        return {}
+
+
+def save_pending_payments(data):
+
+    try:
+
+        with open(
+            PENDING_PAYMENTS_FILE,
+            "w",
+            encoding="utf-8"
+        ) as file:
+
+            json.dump(
+                data,
+                file,
+                indent=4,
+                ensure_ascii=False
+            )
+
+        return True
+
+    except OSError:
+
+        return False
+
+
+def remove_pending_payment(razorpay_order_id):
+
+    if not razorpay_order_id:
+        return
+
+    pending_payments = load_pending_payments()
+
+    pending_payments.pop(
+        str(razorpay_order_id),
+        None
+    )
+
+    save_pending_payments(
+        pending_payments
+    )
 
 
 # =========================================
@@ -1965,8 +2042,9 @@ def place_order():
     if final_total < 0:
         final_total = 0
 
-    # Razorpay amount must be sent in paise.
-    razorpay_amount = int(final_total * 100)
+    razorpay_amount = int(
+        final_total * 100
+    )
 
     if razorpay_amount <= 0:
         return "Invalid payment amount. Please try again."
@@ -1976,9 +2054,13 @@ def place_order():
     try:
 
         razorpay_order = razorpay_client.order.create({
+
             "amount": razorpay_amount,
+
             "currency": "INR",
+
             "receipt": site_order_id,
+
             "notes": {
                 "customer_name": name,
                 "customer_mobile": mobile
@@ -1987,53 +2069,124 @@ def place_order():
 
     except Exception as error:
 
-        print("Razorpay order creation error:", error)
+        print(
+            "Razorpay order creation error:",
+            error
+        )
 
         return "RAZORPAY ERROR: " + str(error)
 
     delivery_date_object = (
-        datetime.now() + timedelta(days=10)
+        datetime.now() +
+        timedelta(days=10)
     )
 
-    delivery_date = delivery_date_object.strftime(
-        "%d-%m-%Y"
+    delivery_date = (
+        delivery_date_object.strftime(
+            "%d-%m-%Y"
+        )
     )
 
-    # Keep checkout data in the session until Razorpay payment is verified.
-    # The actual order is NOT saved as a paid order until signature verification succeeds.
-    session["pending_payment"] = {
+    # =====================================
+    # SAVE PENDING PAYMENT ON SERVER
+    # =====================================
+
+    pending_payment_data = {
+
         "site_order_id": site_order_id,
-        "razorpay_order_id": razorpay_order.get("id", ""),
+
+        "razorpay_order_id": razorpay_order.get(
+            "id",
+            ""
+        ),
+
         "name": name,
+
         "email": email,
+
         "mobile": mobile,
+
         "address": address,
+
         "city": city,
+
         "state": state,
+
         "pincode": pincode,
+
         "items": cart_items,
+
         "product_total": product_total,
+
         "coupon_code": coupon_code,
+
         "discount": discount,
+
         "delivery_charge": delivery_charge,
+
         "final_total": final_total,
+
         "delivery_date": delivery_date
     }
+
+    pending_payments = load_pending_payments()
+
+    pending_payments[
+        str(
+            razorpay_order.get(
+                "id",
+                ""
+            )
+        )
+    ] = pending_payment_data
+
+    if not save_pending_payments(
+        pending_payments
+    ):
+
+        print(
+            "Could not save pending payment:",
+            site_order_id
+        )
+
+        return (
+            "Your payment could not be started safely. "
+            "Please try again."
+        )
+
+    # Keep checkout data in session too.
+    session["pending_payment"] = (
+        pending_payment_data
+    )
 
     session.modified = True
 
     return render_template(
         "payment.html",
+
         razorpay_key_id=RAZORPAY_KEY_ID,
-        razorpay_order_id=razorpay_order.get("id", ""),
+
+        razorpay_order_id=razorpay_order.get(
+            "id",
+            ""
+        ),
+
         amount=razorpay_amount,
+
         amount_rupees=final_total,
+
         amount_paise=razorpay_amount,
+
         order_id=site_order_id,
+
         customer_name=name,
+
         customer_email=email,
+
         customer_mobile=mobile,
+
         cart_count=get_cart_count(),
+
         wishlist_count=get_wishlist_count()
     )
 
@@ -2052,8 +2205,42 @@ def payment_success():
         "pending_payment"
     )
 
-    if not isinstance(pending_payment, dict):
-        return redirect("/checkout")
+    # If browser session is missing, recover from server storage.
+    if not isinstance(
+        pending_payment,
+        dict
+    ):
+
+        submitted_order_id = clean_text(
+            request.form.get(
+                "razorpay_order_id",
+                ""
+            ),
+            100
+        )
+
+        if submitted_order_id:
+
+            pending_payments = (
+                load_pending_payments()
+            )
+
+            pending_payment = (
+                pending_payments.get(
+                    submitted_order_id
+                )
+            )
+
+    if not isinstance(
+        pending_payment,
+        dict
+    ):
+
+        return (
+            "Payment information could not be recovered. "
+            "Please check your payment status before placing "
+            "the order again."
+        )
 
     razorpay_payment_id = clean_text(
         request.form.get(
@@ -2099,20 +2286,36 @@ def payment_success():
         razorpay_order_id !=
         expected_razorpay_order_id
     ):
-        return "Payment verification failed: order mismatch."
 
-    # Step 1: Verify the Checkout signature on the server.
+        return (
+            "Payment verification failed: "
+            "order mismatch."
+        )
+
+    # =====================================
+    # VERIFY CHECKOUT SIGNATURE
+    # =====================================
+
     try:
 
         razorpay_client.utility.verify_payment_signature({
-            "razorpay_order_id": razorpay_order_id,
-            "razorpay_payment_id": razorpay_payment_id,
-            "razorpay_signature": razorpay_signature
+
+            "razorpay_order_id":
+                razorpay_order_id,
+
+            "razorpay_payment_id":
+                razorpay_payment_id,
+
+            "razorpay_signature":
+                razorpay_signature
         })
 
     except Exception as error:
 
-        print("Razorpay payment verification error:", error)
+        print(
+            "Razorpay payment verification error:",
+            error
+        )
 
         return (
             "Payment verification failed. "
@@ -2120,89 +2323,128 @@ def payment_success():
             "Check the payment status first."
         )
 
-    # Step 2: Fetch the payment from Razorpay instead of trusting only
-    # the browser callback. This also lets us confirm the amount and order.
+    # =====================================
+    # FETCH PAYMENT FROM RAZORPAY
+    # =====================================
+
     try:
 
-        payment = razorpay_client.payment.fetch(
-            razorpay_payment_id
+        payment = (
+            razorpay_client.payment.fetch(
+                razorpay_payment_id
+            )
         )
 
     except Exception as error:
 
-        print("Razorpay payment fetch error:", error)
+        print(
+            "Razorpay payment fetch error:",
+            error
+        )
 
         return (
-            "Payment was received by Razorpay, but its status could not "
-            "be verified right now. Please check the Razorpay payment "
-            "status before placing the order again."
+            "Payment was received by Razorpay, but its status "
+            "could not be verified right now. Please check "
+            "the Razorpay payment status before placing "
+            "the order again."
         )
 
     fetched_order_id = str(
-        payment.get("order_id", "")
+        payment.get(
+            "order_id",
+            ""
+        )
     )
 
     if fetched_order_id != razorpay_order_id:
+
         print(
             "Razorpay order mismatch:",
             fetched_order_id,
             razorpay_order_id
         )
-        return "Payment verification failed: Razorpay order mismatch."
+
+        return (
+            "Payment verification failed: "
+            "Razorpay order mismatch."
+        )
 
     expected_amount = int(
         safe_integer(
-            pending_payment.get("final_total", 0),
+            pending_payment.get(
+                "final_total",
+                0
+            ),
             0
         ) * 100
     )
 
     fetched_amount = safe_integer(
-        payment.get("amount", 0),
+        payment.get(
+            "amount",
+            0
+        ),
         0
     )
 
     if fetched_amount != expected_amount:
+
         print(
             "Razorpay amount mismatch:",
             fetched_amount,
             expected_amount
         )
-        return "Payment verification failed: payment amount mismatch."
+
+        return (
+            "Payment verification failed: "
+            "payment amount mismatch."
+        )
 
     payment_status = str(
-        payment.get("status", "")
+        payment.get(
+            "status",
+            ""
+        )
     ).lower()
 
-    # If Razorpay has only authorised the payment, capture it before
-    # marking the Handmade Blooms order as paid.
+    # =====================================
+    # CAPTURE IF ONLY AUTHORISED
+    # =====================================
+
     if payment_status == "authorized":
 
         try:
 
-            payment = razorpay_client.payment.capture(
-                razorpay_payment_id,
-                {
-                    "amount": expected_amount,
-                    "currency": "INR"
-                }
+            payment = (
+                razorpay_client.payment.capture(
+                    razorpay_payment_id,
+                    {
+                        "amount": expected_amount,
+                        "currency": "INR"
+                    }
+                )
             )
 
             payment_status = str(
-                payment.get("status", "")
+                payment.get(
+                    "status",
+                    ""
+                )
             ).lower()
 
         except Exception as error:
 
-            print("Razorpay payment capture error:", error)
-
-            return (
-                "Payment is authorised but has not been captured yet. "
-                "The order has NOT been marked as paid. Please check "
-                "the Razorpay payment status before trying again."
+            print(
+                "Razorpay payment capture error:",
+                error
             )
 
-    # Never mark an order Paid unless Razorpay reports it as captured.
+            return (
+                "Payment is authorised but has not been "
+                "captured yet. The order has NOT been marked "
+                "as paid. Please check the Razorpay payment status."
+            )
+
     if payment_status != "captured":
 
         print(
@@ -2211,10 +2453,18 @@ def payment_success():
         )
 
         return (
-            "Payment verification is incomplete. Razorpay payment status: "
-            + (payment_status or "unknown") +
+            "Payment verification is incomplete. "
+            "Razorpay payment status: " +
+            (
+                payment_status or
+                "unknown"
+            ) +
             ". The order has NOT been marked as paid."
         )
+
+    # =====================================
+    # CREATE ORDER
+    # =====================================
 
     order_id = str(
         pending_payment.get(
@@ -2224,16 +2474,22 @@ def payment_success():
     )
 
     if not order_id:
-        return "Order could not be created because the order ID is missing."
+
+        return (
+            "Order could not be created because "
+            "the order ID is missing."
+        )
 
     orders = load_orders()
 
-    # Prevent duplicate order creation if the success callback is submitted twice.
     existing_order = next(
         (
             order for order in orders
             if str(
-                order.get("order_id", "")
+                order.get(
+                    "order_id",
+                    ""
+                )
             ) == order_id
         ),
         None
@@ -2241,8 +2497,15 @@ def payment_success():
 
     if existing_order is not None:
 
+        remove_pending_payment(
+            razorpay_order_id
+        )
+
         session["customer_mobile"] = str(
-            existing_order.get("mobile", "")
+            existing_order.get(
+                "mobile",
+                ""
+            )
         )
 
         session.pop(
@@ -2251,8 +2514,17 @@ def payment_success():
         )
 
         session["cart"] = []
-        session.pop("coupon_code", None)
-        session.pop("coupon_error", None)
+
+        session.pop(
+            "coupon_code",
+            None
+        )
+
+        session.pop(
+            "coupon_error",
+            None
+        )
+
         session.modified = True
 
         return render_template(
@@ -2261,41 +2533,118 @@ def payment_success():
         )
 
     order = {
+
         "order_id": order_id,
-        "name": pending_payment.get("name", ""),
-        "email": pending_payment.get("email", ""),
-        "mobile": pending_payment.get("mobile", ""),
-        "address": pending_payment.get("address", ""),
-        "city": pending_payment.get("city", ""),
-        "state": pending_payment.get("state", ""),
-        "pincode": pending_payment.get("pincode", ""),
-        "items": pending_payment.get("items", []),
-        "product_total": pending_payment.get("product_total", 0),
-        "coupon_code": pending_payment.get("coupon_code", ""),
-        "discount": pending_payment.get("discount", 0),
-        "delivery_charge": pending_payment.get("delivery_charge", 0),
-        "final_total": pending_payment.get("final_total", 0),
-        "total": pending_payment.get("final_total", 0),
+
+        "name": pending_payment.get(
+            "name",
+            ""
+        ),
+
+        "email": pending_payment.get(
+            "email",
+            ""
+        ),
+
+        "mobile": pending_payment.get(
+            "mobile",
+            ""
+        ),
+
+        "address": pending_payment.get(
+            "address",
+            ""
+        ),
+
+        "city": pending_payment.get(
+            "city",
+            ""
+        ),
+
+        "state": pending_payment.get(
+            "state",
+            ""
+        ),
+
+        "pincode": pending_payment.get(
+            "pincode",
+            ""
+        ),
+
+        "items": pending_payment.get(
+            "items",
+            []
+        ),
+
+        "product_total": pending_payment.get(
+            "product_total",
+            0
+        ),
+
+        "coupon_code": pending_payment.get(
+            "coupon_code",
+            ""
+        ),
+
+        "discount": pending_payment.get(
+            "discount",
+            0
+        ),
+
+        "delivery_charge": pending_payment.get(
+            "delivery_charge",
+            0
+        ),
+
+        "final_total": pending_payment.get(
+            "final_total",
+            0
+        ),
+
+        "total": pending_payment.get(
+            "final_total",
+            0
+        ),
+
         "status": "Pending",
-        "delivery_date": pending_payment.get("delivery_date", ""),
+
+        "delivery_date": pending_payment.get(
+            "delivery_date",
+            ""
+        ),
+
         "delivery_time": "Delivery within 10 days",
+
         "order_date": datetime.now().strftime(
             "%d-%m-%Y %I:%M %p"
         ),
+
         "payment_status": "Paid",
+
         "payment_method": "Razorpay",
-        "razorpay_payment_id": razorpay_payment_id,
-        "razorpay_order_id": razorpay_order_id,
-        "razorpay_signature": razorpay_signature
+
+        "razorpay_payment_id":
+            razorpay_payment_id,
+
+        "razorpay_order_id":
+            razorpay_order_id,
+
+        "razorpay_signature":
+            razorpay_signature,
+
+        "payment_verification":
+            "checkout_signature"
     }
 
     orders.append(order)
 
     if not save_orders(orders):
+
         return (
-            "Payment was captured and verified, but the order could not be saved. "
-            "Please contact Handmade Blooms with your payment ID: "
-            + razorpay_payment_id
+            "Payment was captured and verified, but the "
+            "order could not be saved. Please contact "
+            "Handmade Blooms with your payment ID: " +
+            razorpay_payment_id
         )
 
     add_notification(
@@ -2305,15 +2654,32 @@ def payment_success():
             "New paid order " +
             order_id +
             " placed by " +
-            str(order.get("name", "")) +
+            str(
+                order.get(
+                    "name",
+                    ""
+                )
+            ) +
             ". Total: ₹" +
-            str(order.get("final_total", 0))
+            str(
+                order.get(
+                    "final_total",
+                    0
+                )
+            )
         ),
         order_id
     )
 
+    remove_pending_payment(
+        razorpay_order_id
+    )
+
     session["customer_mobile"] = str(
-        order.get("mobile", "")
+        order.get(
+            "mobile",
+            ""
+        )
     )
 
     session.pop(
@@ -2342,6 +2708,599 @@ def payment_success():
 
 
 # =========================================
+# RAZORPAY WEBHOOK
+# =========================================
+
+@app.route(
+    "/razorpay_webhook",
+    methods=["POST"]
+)
+def razorpay_webhook():
+
+    # Razorpay webhook must use its own webhook secret.
+    if not WEBHOOK_SECRET:
+
+        print(
+            "Razorpay webhook error: "
+            "RAZORPAY_WEBHOOK_SECRET is not configured."
+        )
+
+        return (
+            "Webhook secret not configured.",
+            500
+        )
+
+    webhook_signature = request.headers.get(
+        "X-Razorpay-Signature",
+        ""
+    )
+
+    if not webhook_signature:
+
+        return (
+            "Webhook signature missing.",
+            400
+        )
+
+    raw_body = request.get_data()
+
+    expected_signature = hmac.new(
+        WEBHOOK_SECRET.encode("utf-8"),
+        raw_body,
+        hashlib.sha256
+    ).hexdigest()
+
+    if not hmac.compare_digest(
+        expected_signature,
+        webhook_signature
+    ):
+
+        print(
+            "Invalid Razorpay webhook signature."
+        )
+
+        return (
+            "Invalid webhook signature.",
+            400
+        )
+
+    payload = request.get_json(
+        silent=True
+    )
+
+    if not isinstance(
+        payload,
+        dict
+    ):
+
+        return (
+            "Invalid webhook payload.",
+            400
+        )
+
+    event = str(
+        payload.get(
+            "event",
+            ""
+        )
+    ).lower()
+
+    # We only need these payment events.
+    supported_events = {
+        "payment.authorized",
+        "payment.captured",
+        "payment.failed",
+        "order.paid"
+    }
+
+    if event not in supported_events:
+
+        return "OK", 200
+
+    payload_data = payload.get(
+        "payload",
+        {}
+    )
+
+    if not isinstance(
+        payload_data,
+        dict
+    ):
+
+        return "OK", 200
+
+    payment_data = payload_data.get(
+        "payment",
+        {}
+    )
+
+    if not isinstance(
+        payment_data,
+        dict
+    ):
+
+        payment_data = {}
+
+    payment = payment_data.get(
+        "entity",
+        {}
+    )
+
+    if not isinstance(
+        payment,
+        dict
+    ):
+
+        payment = {}
+
+    order_data = payload_data.get(
+        "order",
+        {}
+    )
+
+    if not isinstance(
+        order_data,
+        dict
+    ):
+
+        order_data = {}
+
+    razorpay_order_entity = order_data.get(
+        "entity",
+        {}
+    )
+
+    if not isinstance(
+        razorpay_order_entity,
+        dict
+    ):
+
+        razorpay_order_entity = {}
+
+    razorpay_payment_id = str(
+        payment.get(
+            "id",
+            ""
+        )
+    )
+
+    razorpay_order_id = str(
+        payment.get(
+            "order_id",
+            ""
+        )
+    )
+
+    if not razorpay_order_id:
+
+        razorpay_order_id = str(
+            razorpay_order_entity.get(
+                "id",
+                ""
+            )
+        )
+
+    if not razorpay_order_id:
+
+        return (
+            "Razorpay order ID missing.",
+            400
+        )
+
+    # =====================================
+    # PAYMENT FAILED
+    # =====================================
+
+    if event == "payment.failed":
+
+        remove_pending_payment(
+            razorpay_order_id
+        )
+
+        print(
+            "Razorpay payment failed:",
+            razorpay_payment_id,
+            razorpay_order_id
+        )
+
+        return "OK", 200
+
+    # =====================================
+    # LOAD SERVER-SIDE PENDING PAYMENT
+    # =====================================
+
+    pending_payments = (
+        load_pending_payments()
+    )
+
+    pending_payment = (
+        pending_payments.get(
+            razorpay_order_id
+        )
+    )
+
+    if not isinstance(
+        pending_payment,
+        dict
+    ):
+
+        # The order may already have been created by
+        # the normal Checkout success callback.
+        existing_site_order_id = str(
+            razorpay_order_entity.get(
+                "receipt",
+                ""
+            )
+        )
+
+        if existing_site_order_id:
+
+            orders = load_orders()
+
+            existing_order = next(
+                (
+                    order for order in orders
+                    if str(
+                        order.get(
+                            "order_id",
+                            ""
+                        )
+                    ) == existing_site_order_id
+                ),
+                None
+            )
+
+            if existing_order is not None:
+                return "OK", 200
+
+        print(
+            "No pending payment found for Razorpay order:",
+            razorpay_order_id
+        )
+
+        # Return 200 so Razorpay does not endlessly retry
+        # an event for which there is no recoverable checkout data.
+        return "OK", 200
+
+    # =====================================
+    # FETCH PAYMENT FROM RAZORPAY
+    # =====================================
+
+    if not razorpay_payment_id:
+
+        return (
+            "Razorpay payment ID missing.",
+            400
+        )
+
+    try:
+
+        fetched_payment = (
+            razorpay_client.payment.fetch(
+                razorpay_payment_id
+            )
+        )
+
+    except Exception as error:
+
+        print(
+            "Webhook payment fetch error:",
+            error
+        )
+
+        return (
+            "Payment could not be verified.",
+            500
+        )
+
+    fetched_order_id = str(
+        fetched_payment.get(
+            "order_id",
+            ""
+        )
+    )
+
+    if fetched_order_id != razorpay_order_id:
+
+        print(
+            "Webhook order mismatch:",
+            fetched_order_id,
+            razorpay_order_id
+        )
+
+        return (
+            "Payment order mismatch.",
+            400
+        )
+
+    expected_amount = int(
+        safe_integer(
+            pending_payment.get(
+                "final_total",
+                0
+            ),
+            0
+        ) * 100
+    )
+
+    fetched_amount = safe_integer(
+        fetched_payment.get(
+            "amount",
+            0
+        ),
+        0
+    )
+
+    if fetched_amount != expected_amount:
+
+        print(
+            "Webhook amount mismatch:",
+            fetched_amount,
+            expected_amount
+        )
+
+        return (
+            "Payment amount mismatch.",
+            400
+        )
+
+    payment_status = str(
+        fetched_payment.get(
+            "status",
+            ""
+        )
+    ).lower()
+
+    # =====================================
+    # AUTHORISED -> CAPTURE
+    # =====================================
+
+    if payment_status == "authorized":
+
+        try:
+
+            fetched_payment = (
+                razorpay_client.payment.capture(
+                    razorpay_payment_id,
+                    {
+                        "amount": expected_amount,
+                        "currency": "INR"
+                    }
+                )
+            )
+
+            payment_status = str(
+                fetched_payment.get(
+                    "status",
+                    ""
+                )
+            ).lower()
+
+        except Exception as error:
+
+            print(
+                "Webhook payment capture error:",
+                error
+            )
+
+            return (
+                "Payment capture failed.",
+                500
+            )
+
+    # =====================================
+    # ONLY CAPTURED PAYMENT CREATES ORDER
+    # =====================================
+
+    if payment_status != "captured":
+
+        print(
+            "Webhook payment is not captured. Status:",
+            payment_status
+        )
+
+        return "OK", 200
+
+    site_order_id = str(
+        pending_payment.get(
+            "site_order_id",
+            ""
+        )
+    )
+
+    if not site_order_id:
+
+        return (
+            "Site order ID missing.",
+            400
+        )
+
+    orders = load_orders()
+
+    # =====================================
+    # DUPLICATE PROTECTION
+    # =====================================
+
+    existing_order = next(
+        (
+            order for order in orders
+            if str(
+                order.get(
+                    "order_id",
+                    ""
+                )
+            ) == site_order_id
+        ),
+        None
+    )
+
+    if existing_order is not None:
+
+        remove_pending_payment(
+            razorpay_order_id
+        )
+
+        return "OK", 200
+
+    # =====================================
+    # CREATE ORDER FROM WEBHOOK
+    # =====================================
+
+    order = {
+
+        "order_id": site_order_id,
+
+        "name": pending_payment.get(
+            "name",
+            ""
+        ),
+
+        "email": pending_payment.get(
+            "email",
+            ""
+        ),
+
+        "mobile": pending_payment.get(
+            "mobile",
+            ""
+        ),
+
+        "address": pending_payment.get(
+            "address",
+            ""
+        ),
+
+        "city": pending_payment.get(
+            "city",
+            ""
+        ),
+
+        "state": pending_payment.get(
+            "state",
+            ""
+        ),
+
+        "pincode": pending_payment.get(
+            "pincode",
+            ""
+        ),
+
+        "items": pending_payment.get(
+            "items",
+            []
+        ),
+
+        "product_total": pending_payment.get(
+            "product_total",
+            0
+        ),
+
+        "coupon_code": pending_payment.get(
+            "coupon_code",
+            ""
+        ),
+
+        "discount": pending_payment.get(
+            "discount",
+            0
+        ),
+
+        "delivery_charge": pending_payment.get(
+            "delivery_charge",
+            0
+        ),
+
+        "final_total": pending_payment.get(
+            "final_total",
+            0
+        ),
+
+        "total": pending_payment.get(
+            "final_total",
+            0
+        ),
+
+        "status": "Pending",
+
+        "delivery_date": pending_payment.get(
+            "delivery_date",
+            ""
+        ),
+
+        "delivery_time": "Delivery within 10 days",
+
+        "order_date": datetime.now().strftime(
+            "%d-%m-%Y %I:%M %p"
+        ),
+
+        "payment_status": "Paid",
+
+        "payment_method": "Razorpay",
+
+        "razorpay_payment_id":
+            razorpay_payment_id,
+
+        "razorpay_order_id":
+            razorpay_order_id,
+
+        "razorpay_signature":
+            "",
+
+        "payment_verification":
+            "razorpay_webhook"
+    }
+
+    orders.append(order)
+
+    if not save_orders(orders):
+
+        print(
+            "Webhook order save failed:",
+            site_order_id
+        )
+
+        return (
+            "Order could not be saved.",
+            500
+        )
+
+    add_notification(
+        "new_order",
+        "New Paid Order Received 🛒",
+        (
+            "New paid order " +
+            site_order_id +
+            " placed by " +
+            str(
+                order.get(
+                    "name",
+                    ""
+                )
+            ) +
+            ". Total: ₹" +
+            str(
+                order.get(
+                    "final_total",
+                    0
+                )
+            )
+        ),
+        site_order_id
+    )
+
+    remove_pending_payment(
+        razorpay_order_id
+    )
+
+    print(
+        "Razorpay webhook created paid order:",
+        site_order_id
+    )
+
+    return "OK", 200
+
+
+# =========================================
 # PAYMENT FAILED / CANCELLED
 # =========================================
 
@@ -2355,6 +3314,7 @@ def payment_failed():
     )
 
 
+# =========================================
 # CUSTOM BOUQUET
 # =========================================
 
@@ -2909,7 +3869,6 @@ def cancel_order(order_id):
 )
 def contact():
 
-
     error = None
     success = None
 
@@ -3090,6 +4049,8 @@ def contact():
         cart_count=get_cart_count(),
         wishlist_count=get_wishlist_count()
     )
+
+
 # =========================================
 # ABOUT US
 # =========================================
@@ -3102,6 +4063,8 @@ def about():
         cart_count=get_cart_count(),
         wishlist_count=get_wishlist_count()
     )
+
+
 @app.route("/faq")
 def faq():
 
@@ -3110,6 +4073,7 @@ def faq():
         cart_count=get_cart_count(),
         wishlist_count=get_wishlist_count()
     )
+
 
 # =========================================
 # CUSTOMER SIGNUP
